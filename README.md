@@ -9,7 +9,7 @@ This repository contains a **production-grade, AI-powered Hospital Management Sy
 
 The solution is built **from scratch**, optimized for **long-term maintainability**, **high development velocity**, and **enterprise scalability**, using:
 
-* **Backend:** Spring Boot 5 (Java, JDK 25)
+* **Backend:** Spring Boot 5 (Java, JDK 21)
 * **Frontend:** React + TypeScript
 * **Architecture:** Modular Monolith (DDD-aligned) evolving into Microservices
 * **AI Layer:** Clinical decision support, automation, analytics
