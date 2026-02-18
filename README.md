@@ -1,38 +1,48 @@
-
-AI-Powered Enterprise Hospital Management System
+🏥 AI-Powered Enterprise Hospital Management System
 Overview
 
-This repository contains a production-grade, AI-powered Hospital Management System (HMS) designed at the scale and operational complexity of Korle Bu Teaching Hospital. The system is architected for tertiary healthcare delivery, teaching & research, national health insurance workflows (NHIS – Ghana), and high-availability clinical operations.
+This repository contains a production-grade, AI-powered Hospital Management System (HMS) designed at the scale and operational complexity of Korle Bu Teaching Hospital.
 
-The solution is built from scratch, optimized for long-term maintainability, high development velocity, and enterprise scalability, using:
+The system is architected for:
 
-Backend: Spring Boot 5 (Java, JDK 21)
+- 🏥 Tertiary healthcare delivery
 
-Frontend: React + TypeScript
+- 🎓 Teaching & research hospitals
 
-Architecture: Monolithic with modular separation, ready to evolve into microservices
+- 🧾 National Health Insurance workflows (NHIS – Ghana)
 
-AI Layer: Clinical decision support, automation, analytics
+- ⚡ High-availability clinical operations
+---
 
-Security: Zero-trust, RBAC, audit-compliant
+🧱 Technology Stack
 
-This README is intentionally exhaustive to eliminate architectural ambiguity and prevent rework during implementation.
+Layer	Technology
+| Layer            | Technology                                       |
+| ---------------- | ------------------------------------------------ |
+| **Backend**      | Spring Boot 5 (Java, JDK 21)                     |
+| **Frontend**     | React + TypeScript                               |
+| **Architecture** | Modular Monolith (Microservices-ready)           |
+| **AI Layer**     | Clinical decision support, automation, analytics |
+| **Security**     | Zero-trust, RBAC, audit-compliant                |
 
-Design Philosophy
+---
+🎯 Design Philosophy
 
-Modular monolith – clear module separation
+- ✅ Modular monolith – clear module separation
 
-Strict layering rules
+- ✅ Strict layering rules
 
-Minimal magic frameworks
+- ✅ Minimal magic frameworks
 
-Explicit entity models
+- ✅ Explicit entity models
 
-Forward-compatible with microservices
+- ✅ Forward-compatible with microservices
 
-Following this structure ensures smooth scaling to a service-oriented architecture later.
+This structure ensures smooth scaling to a full service-oriented architecture later.
+---
 
-High-Level Architecture
+```
+🏗 High-Level Architecture
 ┌──────────────────────────┐
 │        React UI          │
 │  (ShadCN + RHF + Zod)    │
@@ -47,23 +57,26 @@ High-Level Architecture
 │ (Modular Monolith – Microservices-ready Modules)        │
 │                                                        │
 │  • Patient Management                                  │
-│  • Clinical Operations                                  │
-│  • Staff & HR                                           │
-│  • Pharmacy                                             │
-│  • Laboratory                                           │
-│  • Radiology                                            │
-│  • Billing & NHIS                                       │
-│  • Inventory & Stores                                   │
-│  • Appointments                                         │
-│  • EMR                                                  │
-│  • AI & Analytics                                       │
+│  • Clinical Operations                                 │
+│  • Staff & HR                                          │
+│  • Pharmacy                                            │
+│  • Laboratory                                          │
+│  • Radiology                                           │
+│  • Billing & NHIS                                      │
+│  • Inventory & Stores                                  │
+│  • Appointments                                        │
+│  • EMR                                                 │
+│  • AI & Analytics                                      │
 └────────────────────────────────────────────────────────┘
             │
 ┌───────────▼──────────────┐
 │   MySQL / PostgreSQL     │
 └──────────────────────────┘
+```
+---
 
-Monolithic Microservices Skeleton
+🧩 Monolithic Microservices Skeleton
+```
 /hms-backend
  ├── patient/
  ├── staff/
@@ -77,33 +90,40 @@ Monolithic Microservices Skeleton
  ├── ai/
  ├── security/
  └── shared/
-
+```
 
 Each module contains:
 
-Controller – REST endpoints
+- Controller – REST endpoints
 
-Service – business logic
+- Service – Business logic
 
-Repository – database interaction
+- Repository – Database interaction
 
-DTOs – input/output models
+- DTOs – Input/output models
 
-Config – module-specific configuration
+- Config – Module-specific configuration
 
 Future microservices can be extracted from any module without rewriting core logic.
 
-Backend Patterns
-Concern	Pattern
-Object Creation	Factory Pattern
-Business Rules	Service Layer
-Persistence	Repository Pattern
-API	REST (Controller-Service separation)
-Security	JWT + RBAC + Policy Enforcement
-Auditing	Event-driven logging
-AI	Strategy Pattern
-Core Modules & Entities
-1. Patient Management
+---
+🧠 Backend Patterns
+
+| Concern         | Pattern                              |
+| --------------- | ------------------------------------ |
+| Object Creation | Factory Pattern                      |
+| Business Rules  | Service Layer                        |
+| Persistence     | Repository Pattern                   |
+| API             | REST (Controller-Service separation) |
+| Security        | JWT + RBAC + Policy Enforcement      |
+| Auditing        | Event-driven logging                 |
+| AI              | Strategy Pattern                     |
+
+
+---
+🏥 Core Modules & Entities
+1️⃣ Patient Management
+```
 UUID id
 String hospitalNumber
 String firstName
@@ -116,8 +136,9 @@ String nationality
 String nhisNumber
 PatientStatus status
 LocalDateTime createdAt
-
-2. Staff & HR
+```
+2️⃣ Staff & HR
+```
 UUID id
 String staffNumber
 String firstName
@@ -127,16 +148,18 @@ Department department
 EmploymentType employmentType
 String phone
 boolean active
-
-3. Appointments
+```
+3️⃣ Appointments
+```
 UUID id
 Patient patient
 Staff doctor
 LocalDateTime appointmentTime
 AppointmentStatus status
 String reason
-
-4. EMR
+```
+4️⃣ EMR
+```
 UUID id
 Patient patient
 Staff createdBy
@@ -144,121 +167,124 @@ String diagnosis
 String treatmentPlan
 String notes
 LocalDateTime createdAt
-
-5. Pharmacy
+```
+5️⃣ Pharmacy
+```
 UUID id
 String drugName
 String batchNumber
 LocalDate expiryDate
 int quantityAvailable
 BigDecimal unitPrice
-
-6. Laboratory
+```
+6️⃣ Laboratory
+```
 UUID id
 String testName
 Patient patient
 Staff labScientist
 LabStatus status
 String result
-
-7. Billing & NHIS
+```
+7️⃣ Billing & NHIS
+```
 UUID id
 Patient patient
 BigDecimal totalAmount
 PaymentStatus status
 LocalDateTime issuedAt
-
+```
+```
 UUID id
 Patient patient
 String claimCode
 ClaimStatus status
 LocalDate submittedDate
-
-8. Inventory
+```
+8️⃣ Inventory
+```
 UUID id
 String itemName
 String category
 int quantity
 String location
+```
+🤖 AI Features
+| Area              | AI Capability          |
+| ----------------- | ---------------------- |
+| Triage            | Symptom classification |
+| Diagnosis Support | Rule + ML hybrid       |
+| Fraud Detection   | NHIS anomaly detection |
+| Scheduling        | Load optimization      |
+| Reporting         | Predictive analytics   |
 
-AI Features
-Area	AI Capability
-Triage	Symptom classification
-Diagnosis Support	Rule + ML hybrid
-Fraud Detection	NHIS anomaly detection
-Scheduling	Load optimization
-Reporting	Predictive analytics
-Security
+🔐 Security
 
-JWT Authentication
+- JWT Authentication
 
-Role-Based Access Control
+- Role-Based Access Control (RBAC)
 
-Field-level permissions
+- Field-level permissions
 
-Audit logs (immutable)
+- Immutable audit logs
 
-HIPAA-style access tracking
+- HIPAA-style access tracking
 
-Frontend Stack
+🎨 Frontend Stack
 
-React + TypeScript
+- React + TypeScript
 
-ShadCN/UI for components
+- ShadCN/UI components
 
-React Hook Form + Zod for validation
+- React Hook Form (RHF)
 
-Database Strategy
+- Zod validation
 
-MySQL 8 or PostgreSQL
+🗄 Database Strategy
 
-UUID primary keys
+- MySQL 8 or PostgreSQL
 
-Flyway migrations
+- UUID primary keys
 
-Strict foreign keys
+- Flyway migrations
 
-Development Workflow
+- Strict foreign keys
 
-Define entity
+- Transaction-safe operations
 
-Create repository
+🚀 Development Workflow
 
-Add service logic
+- Define entity
 
-Expose REST endpoint
+- Create repository
 
-Add frontend form (RHF + Zod)
+- Add service logic
 
-Secure endpoint
+- Expose REST endpoint
 
-Add audit logging
+- Add frontend form (RHF + Zod)
 
-Non-Functional Requirements
+- Secure endpoint
 
-Horizontal scalability
+- Add audit logging
 
-High availability
+⚙ Non-Functional Requirements
 
-Transaction safety
+- Horizontal scalability
 
-Observability (logs, metrics)
+- High availability
 
-Data integrity
+- Transaction safety
 
-License
+- Observability (logs & metrics)
+
+- Data integrity
+
+📄 License
 
 Proprietary – Hospital & Government Use
-
-If you want, I can generate a ready-to-run folder structure with Spring Boot modules including dummy controllers, services, and DTOs to kickstart the HMS monolith. This would give you a full skeleton project you can compile immediately.
-
-Do you want me to do that next?
-
-yes
-
-Perfect! I’ll outline a ready-to-run Spring Boot monolithic skeleton for your AI-Powered Hospital Management System. This will include modules, controllers, services, repositories, DTOs, and a basic application setup, so you can compile and start extending immediately.
-
-Project Skeleton Structure
+```
+🔧 Spring Boot Monolith Skeleton (Ready-to-Run)
 hms-backend/
 ├── pom.xml
 ├── src/main/java/com/hms
@@ -266,186 +292,397 @@ hms-backend/
 │   ├── config/
 │   │   └── SecurityConfig.java
 │   ├── shared/
-│   │   ├── dto/
-│   │   └── exception/
 │   ├── patient/
-│   │   ├── controller/PatientController.java
-│   │   ├── service/PatientService.java
-│   │   ├── repository/PatientRepository.java
-│   │   └── model/Patient.java
 │   ├── staff/
-│   │   ├── controller/StaffController.java
-│   │   ├── service/StaffService.java
-│   │   ├── repository/StaffRepository.java
-│   │   └── model/Staff.java
 │   ├── appointment/
-│   │   ├── controller/AppointmentController.java
-│   │   ├── service/AppointmentService.java
-│   │   ├── repository/AppointmentRepository.java
-│   │   └── model/Appointment.java
 │   ├── pharmacy/
-│   │   ├── controller/DrugController.java
-│   │   ├── service/DrugService.java
-│   │   ├── repository/DrugRepository.java
-│   │   └── model/Drug.java
 │   ├── lab/
-│   │   ├── controller/LabTestController.java
-│   │   ├── service/LabTestService.java
-│   │   ├── repository/LabTestRepository.java
-│   │   └── model/LabTest.java
 │   ├── billing/
-│   │   ├── controller/BillingController.java
-│   │   ├── service/BillingService.java
-│   │   ├── repository/InvoiceRepository.java
-│   │   └── model/Invoice.java
 │   ├── nhis/
-│   │   ├── controller/NhisController.java
-│   │   ├── service/NhisService.java
-│   │   ├── repository/NhisClaimRepository.java
-│   │   └── model/NhisClaim.java
 │   ├── inventory/
-│   │   ├── controller/InventoryController.java
-│   │   ├── service/InventoryService.java
-│   │   ├── repository/InventoryRepository.java
-│   │   └── model/InventoryItem.java
 │   └── ai/
-│       ├── controller/AiController.java
-│       ├── service/AiService.java
-│       └── model/AiTask.java
 └── src/main/resources/
     ├── application.properties
     └── db/migration/
+```
 
-Example Code Snippets
-HmsApplication.java
-package com.hms;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
+Example: HmsApplication.java
+```
 @SpringBootApplication
 public class HmsApplication {
     public static void main(String[] args) {
         SpringApplication.run(HmsApplication.class, args);
     }
 }
-
-Sample Module: Patient
-Patient.java
-package com.hms.patient.model;
-
-import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-@Entity
-public class Patient {
-
-    @Id
-    @GeneratedValue
-    private UUID id;
-
-    private String hospitalNumber;
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
-    private String gender;
-    private String phoneNumber;
-    private String address;
-    private String nationality;
-    private String nhisNumber;
-    private String status;
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    // Getters and Setters
-}
-
-PatientRepository.java
-package com.hms.patient.repository;
-
-import com.hms.patient.model.Patient;
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.UUID;
-
-public interface PatientRepository extends JpaRepository<Patient, UUID> {}
-
-PatientService.java
-package com.hms.patient.service;
-
-import com.hms.patient.model.Patient;
-import com.hms.patient.repository.PatientRepository;
-import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.UUID;
-
-@Service
-public class PatientService {
-
-    private final PatientRepository repository;
-
-    public PatientService(PatientRepository repository) {
-        this.repository = repository;
-    }
-
-    public List<Patient> getAllPatients() {
-        return repository.findAll();
-    }
-
-    public Patient getPatient(UUID id) {
-        return repository.findById(id).orElse(null);
-    }
-
-    public Patient createPatient(Patient patient) {
-        return repository.save(patient);
-    }
-}
-
-PatientController.java
-package com.hms.patient.controller;
-
-import com.hms.patient.model.Patient;
-import com.hms.patient.service.PatientService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
-
-@RestController
-@RequestMapping("/api/patients")
-public class PatientController {
-
-    private final PatientService service;
-
-    public PatientController(PatientService service) {
-        this.service = service;
-    }
-
-    @GetMapping
-    public List<Patient> getAll() {
-        return service.getAllPatients();
-    }
-
-    @GetMapping("/{id}")
-    public Patient getById(@PathVariable UUID id) {
-        return service.getPatient(id);
-    }
-
-    @PostMapping
-    public Patient create(@RequestBody Patient patient) {
-        return service.createPatient(patient);
-    }
-}
-
-Configuration: application.properties
+```
+Example: application.properties
+```
 spring.datasource.url=jdbc:mysql://localhost:3306/hms
 spring.datasource.username=root
 spring.datasource.password=password
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 server.port=8080
+```
+🏁 Next Steps
+
+This skeleton provides:
+
+- Clean modular architecture
+
+- Full CRUD capability
+
+- Enterprise-ready layering
+
+- Microservice extraction capability
+
+If you'd like next, I can generate:
+
+- ✅ Full pom.xml
+
+- ✅ JWT Security Configuration
+
+- ✅ Docker setup
+
+- ✅ CI/CD pipeline
+
+- ✅ Production deployment guide
+
+- ✅ Database ERD diagram
+
+- ✅ AI module architecture
 
 
-✅ This skeleton can be replicated for each module (staff, appointment, pharmacy, etc.) with their respective entities and repositories.
 
-Once this is done, your modular monolith is fully functional, and each module can later be split into microservices without core logic changes.
+Perfect. Below is a complete enterprise starter pack for your AI-Powered HMS.
+
+This includes:
+
+- ✅ Production-ready pom.xml
+
+- ✅ JWT Security Configuration
+
+- ✅ Docker setup (Dev + Prod)
+
+- ✅ CI/CD (GitHub Actions)
+
+- ✅ Production Deployment Guide
+
+- ✅ Database ERD (logical design)
+
+- ✅ AI Module Architecture
+
+1️⃣ Production-Ready pom.xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hms</groupId>
+    <artifactId>hms-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>AI Hospital Management System</name>
+    <description>Enterprise AI-Powered HMS</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+    </parent>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- JPA -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- Security -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Database -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- Flyway -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- Actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>
+
+2️⃣ JWT Security Configuration
+SecurityConfig.java
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/actuator/**").hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+}
+
+JwtUtil.java
+@Component
+public class JwtUtil {
+
+    private final String SECRET = "CHANGE_THIS_TO_ENV_SECRET";
+
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .signWith(SignatureAlgorithm.HS256, SECRET)
+                .compact();
+    }
+
+    public String extractUsername(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+}
+
+3️⃣ Docker Setup
+Dockerfile
+```
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+COPY target/hms-backend.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+docker-compose.yml
+```
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: hms
+      POSTGRES_USER: hms
+      POSTGRES_PASSWORD: hms
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/hms
+      SPRING_DATASOURCE_USERNAME: hms
+      SPRING_DATASOURCE_PASSWORD: hms
+```
+4️⃣ CI/CD – GitHub Actions
+
+.github/workflows/build.yml
+```
+name: Build & Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build
+        run: mvn clean package
+```
+5️⃣ Production Deployment Guide
+Option A – VPS Deployment
+
+Install Docker
+
+Clone repo
+
+Build:
+```
+mvn clean package
+docker-compose up -d
+```
+Option B – Kubernetes (Enterprise)
+
+Deploy Postgres as StatefulSet
+
+Deploy HMS as Deployment
+
+Use Ingress + TLS
+
+Enable horizontal pod autoscaling
+
+6️⃣ Logical ERD (High-Level)
+```
+Patient (1) ───── (N) Appointment
+Patient (1) ───── (N) EMR
+Patient (1) ───── (N) Invoice
+Patient (1) ───── (N) NHISClaim
+
+Staff (1) ───── (N) Appointment
+Staff (1) ───── (N) EMR
+Staff (1) ───── (N) LabTest
+
+InventoryItem (1) ───── (N) Pharmacy
+```
+
+Primary keys: UUID
+Foreign keys: Strictly enforced
+Indexes: On hospitalNumber, staffNumber, claimCode
+
+7️⃣ AI Module Architecture
+Pattern: Strategy + Rule Engine Hybrid
+```
+AiService
+ ├── TriageStrategy
+ ├── DiagnosisStrategy
+ ├── FraudDetectionStrategy
+ ├── SchedulingOptimizationStrategy
+```
+Example Strategy
+```
+public interface DiagnosisStrategy {
+    String suggestDiagnosis(String symptoms);
+}
+```
+```
+@Component
+public class RuleBasedDiagnosis implements DiagnosisStrategy {
+
+    @Override
+    public String suggestDiagnosis(String symptoms) {
+        if (symptoms.contains("fever")) {
+            return "Possible Malaria";
+        }
+        return "Further tests required";
+    }
+}
+```
+8️⃣ Production Hardening Checklist
+
+-  Enable HTTPS
+
+-  Use environment-based secrets
+
+-  Enable database backups
+
+-  Add Prometheus metrics
+
+-  Enable centralized logging (ELK)
+
+-  Add rate limiting
+
+-  Enable Redis caching
+
+-  Implement audit event store
+
+-  Add distributed tracing (OpenTelemetry)
+
+🎯 Final Result
+
+You now have:
+
+✔ Enterprise modular monolith
+✔ JWT security
+✔ Dockerized environment
+✔ CI/CD pipeline
+✔ AI-ready architecture
+✔ Scalable database design
+✔ Production deployment blueprint
