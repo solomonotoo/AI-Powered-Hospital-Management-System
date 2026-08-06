@@ -1,0 +1,46 @@
+Start Dev Infrastructure
+docker compose \
+--env-file .env.dev \
+-f docker-compose.yml \
+-f docker-compose-dev.yml \
+up -d
+
+Stop Dev Infrastructure
+
+docker compose \
+--env-file .env.dev \
+-f docker-compose.yml \
+-f docker-compose-dev.yml \
+down
+
+
+
+Start Production
+
+docker compose \
+--env-file .env.prod \
+-f docker-compose.yml \
+-f docker-compose-prod.yml \
+up -d
+
+
+Stop Production
+
+docker compose \
+--env-file .env.prod \
+-f docker-compose.yml \
+-f docker-compose-prod.yml \
+down
+
+
+
+
+
+Use these values in pgAdmin:
+
+Field	Value
+Host name/address	localhost
+Port	5432
+Maintenance database	hms
+Username	hms_user
+Password	hms_dev_password

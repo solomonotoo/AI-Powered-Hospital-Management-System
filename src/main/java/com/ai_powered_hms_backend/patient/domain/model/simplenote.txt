@@ -1,0 +1,96 @@
+can a shared value object be annotated with @Embeddable in spring modulith applicationYes, a shared Value Object can and should be annotated with @Embeddable in a Spring Modulith application.However, because this is Spring Modulith, where you position this class dictates whether your architecture remains clean or breaks.Architectural Rules for Spring ModulithIn Spring Modulith, a Shared Kernel usually manifests in one of two ways:A dedicated shared top-level package (exposed to all modules).An external library/artifact imported by all modules.If your Value Object lives inside an exposed shared module, your individual feature modules (like patient or staff) can freely use it inside their JPA @Entity classes with @Embedded.The Design Challenge: Leakage vs. PragmatismPurists of Domain-Driven Design (DDD) argue that Value Objects in a Shared Kernel should be pure Java code, completely free of framework annotations like @Embeddable.In a Spring Modulith setup, applying @Embeddable directly to your shared record forces you to choose a trade-off:The Pragmatic Approach (Recommended): Put @Embeddable directly on your PersonName or Address record in the shared module. It requires your shared module to depend on Jakarta Persistence (jakarta.persistence-api). Since Spring Modulith keeps everything in a single monolith codebase anyway, this dependency is harmless and eliminates massive amounts of mapping boilerplate.The Pure DDD Approach: Keep the shared record 100% framework-free. Inside your specific feature module's entity, use a JPA AttributeConverter to map the record to database columns, or map it manually using a local, unshared Entity DTO.Implementation Example (Pragmatic Approach)1. Defined in your Shared Module (com.example.shared.domain):javapackage com.example.shared.domain;
+
+import jakarta.persistence.Embeddable;
+
+@Embeddable
+public record PersonName(
+    String firstName, 
+    String lastName, 
+    String maidenName, 
+    String preferredName
+) {
+    // Constructors and validation logic...
+}
+Use code with caution.2. Used in a Feature Module (com.example.patient):javapackage com.example.patient;
+
+import com.example.shared.domain.PersonName;
+import jakarta.persistence.*;
+
+@Entity
+class Patient {
+    @Id 
+    private Long id;
+
+    @Embedded // Automatically maps firstName, lastName, etc., to the patient table
+    private PersonName name; 
+}
+Use code with caution.⚠️ Crucial Database Mapping GotchaIf your feature modules need to use the same @Embeddable record multiple times in the same entity (or need custom column lengths), you must override the column names locally using @AttributeOverrides. Otherwise, JPA will crash because of duplicate column names.java@Entity
+class EmergencyContact {
+    @Id 
+    private Long id;
+
+    @Embedded
+    private PersonName primaryContactName;
+
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "firstName", column = @Column(name = "secondary_first_name")),
+        @AttributeOverride(name = "lastName", column = @Column(name = "secondary_last_name")),
+        @AttributeOverride(name = "maidenName", column = @Column(name = "secondary_maiden_name")),
+        @AttributeOverride(name = "preferredName", column = @Column(name = "secondary_preferred_name"))
+    })
+    private PersonName secondaryContactName;
+}
+
+
+
+so what if you dont use @EmbeddableIf you do not use @Embeddable, your JPA provider (like Hibernate) will treat the Value Object as an unknown type. It will either throw a mapping exception on startup or attempt to serialize the entire object into a single binary column (blob).To keep your Value Object clean and free of @Embeddable while still saving it to the database, you must choose one of three alternative mapping strategies.1. The AttributeConverter Strategy (Single Column DB)If you want to store the entire object in a single database column (e.g., as a JSON string or a concatenated string), you can write a custom JPA converter.Pros: Your Shared Kernel stays 100% pure Java; highly flexible.Cons: You cannot easily write SQL queries to filter by individual fields (e.g., WHERE firstName = 'John').java// 1. Keep your record completely pure in the Shared Kernel
+public record PersonName(String firstName, String lastName, String preferredName) {}
+
+// 2. Define a converter inside your feature module (e.g., Patient Module)
+@Converter
+public class PersonNameConverter implements AttributeConverter<PersonName, String> {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public String convertToDatabaseColumn(PersonName attribute) {
+        try { return objectMapper.writeValueAsString(attribute); } 
+        catch (JsonProcessingException e) { throw new RuntimeException(e); }
+    }
+
+    @Override
+    public PersonName convertToEntityAttribute(String dbData) {
+        try { return objectMapper.readValue(dbData, PersonName.class); } 
+        catch (JsonProcessingException e) { throw new RuntimeException(e); }
+    }
+}
+
+// 3. Apply it to your entity
+@Entity
+public class Patient {
+    @Id private Long id;
+    
+    @Convert(converter = PersonNameConverter.class)
+    private PersonName name; // Saves as a JSON string in a single VARCHAR/JSON column
+}
+Use code with caution.2. Manual Mapping via @SecondaryTable (Multi-Column DB)If you want to keep the object pure but still want separate database columns for first_name and last_name, you can skip embedding entirely. Instead, you define fields individually on the Entity and map them to the record manually in getters/setters or factory methods.Pros: Clean database schema; pure domain model.Cons: Introduces repetitive boilerplate code in every entity that uses the name.java@Entity
+public class Patient {
+    @Id private Long id;
+    
+    // Flat database columns
+    private String firstName;
+    private String lastName;
+    private String preferredName;
+
+    // Domain presentation layer
+    public PersonName getName() {
+        return new PersonName(this.firstName, this.lastName, this.preferredName);
+    }
+
+    public void setName(PersonName name) {
+        this.firstName = name.firstName();
+        this.lastName = name.lastName();
+        this.preferredName = name.preferredName();
+    }
+}
+Use code with caution.3. The Local Mirror Copy StrategyYou keep a pure PersonName record in your Shared Kernel. Inside your specific feature module (e.g., patient-module), you create a local, private @Embeddable record or class that exactly mirrors the shared one. You map from the shared object to the local database object inside your repository or service layer.Pros: Ultimate DDD isolation. The shared kernel is completely decoupled from database frameworks.Cons: Requires a distinct mapping layer (like MapStruct or manual mappers) for every read and write database operation.Summary Matrix: Which should you choose?StrategyFramework ContaminationDB Schema CleanlinessBoilerplate Level@EmbeddableHigh (JPA in Shared Kernel)High (Separate Columns)Low (Automatic)AttributeConverterNoneLow (Single JSON/String Column)Medium (One converter class)Manual MappingNoneHigh (Separate Columns)High (Getters/Setters per entity)Local MirrorNoneHigh (Separate Columns)Very High (Requires mapping layer)Would you like to see how to implement the AttributeConverter using a clean delimiter string instead of JSON, or do you want to see how a MapStruct mapper would automate the Local Mirror strategy?
