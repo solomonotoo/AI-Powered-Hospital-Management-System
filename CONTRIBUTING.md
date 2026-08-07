@@ -143,3 +143,5 @@ The grouping objects exist purely in the domain model to express intent and impr
 ---
 
 This convention keeps the domain model explicit while minimizing persistence boilerplate. Each persistence mechanism is chosen based on the structural characteristics of the Value Object rather than applying a single mapping pattern universally.
+
+

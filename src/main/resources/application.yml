@@ -6,6 +6,12 @@ spring:
   application:
     name: hms-application
 
+#========================================
+#Spring AOP proxying issue
+#=================================
+  aop:
+    proxy-target-class: true
+
   # ── Profiles ──────────────────────────────────────────────────────────
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
@@ -152,7 +158,8 @@ management:
 
 logging:
   level:
-    com.hms: DEBUG
+    org.springfrawork.security: DEBUG
+    com.ai_powered_hms_backend: DEBUG
     org.springframework.modulith: DEBUG
     org.flywaydb: INFO
     org.hibernate.SQL: DEBUG

@@ -15,7 +15,7 @@ import com.ai_powered_hms_backend.shared_kernel.valueobjects.Email;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/credentials")
+@RequestMapping("/api/v1/auth/credentials")
 public class CredentialController {
 
 	private final CreateUserCredentialUseCase createUserCredentialUseCase;
@@ -31,7 +31,7 @@ public class CredentialController {
 			@Valid @RequestBody CreateCredentialRequest request
 			){
 		createUserCredentialUseCase.create(new CreateUserCredentialCommand(
-				StaffId.of(request.loginEmail()), new Email(request.loginEmail()), request.temporaryPassword())
+				StaffId.of(request.staffId()), new Email(request.loginEmail()), request.temporaryPassword())
 				);
 		return ResponseEntity.ok().build();
 	}

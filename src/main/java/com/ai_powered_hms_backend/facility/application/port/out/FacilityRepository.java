@@ -3,6 +3,8 @@ package com.ai_powered_hms_backend.facility.application.port.out;
 import java.util.List;
 import java.util.Optional;
 
+import com.ai_powered_hms_backend.facility.domain.eums.FacilityStatus;
+import com.ai_powered_hms_backend.facility.domain.eums.FacilityType;
 import com.ai_powered_hms_backend.facility.domain.model.Facility;
 import com.ai_powered_hms_backend.shared_kernel.ids.FacilityId;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.FacilityCode;
@@ -19,4 +21,10 @@ public interface FacilityRepository {
 //			visibility into its siblings)
 	boolean existsByCode(FacilityCode code);
 	List<Facility> findAllActive();
+	
+	
+
+    /** Paginated, optionally filtered listing for the admin facility list screen. */
+	FacilityPage findAll(FacilityStatus status, FacilityType type,int page, int size);
+	
 }

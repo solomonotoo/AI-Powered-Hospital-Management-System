@@ -4,10 +4,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import com.ai_powered_hms_backend.facility.application.port.out.FacilityPage;
 import com.ai_powered_hms_backend.facility.application.port.out.FacilityRepository;
 import com.ai_powered_hms_backend.facility.domain.eums.FacilityStatus;
+import com.ai_powered_hms_backend.facility.domain.eums.FacilityType;
 import com.ai_powered_hms_backend.facility.domain.model.Facility;
 import com.ai_powered_hms_backend.shared_kernel.ids.FacilityId;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.FacilityCode;
@@ -56,6 +62,30 @@ public class FacilityRepositoryAdaptor  implements FacilityRepository{
 		return jpaRepository.findAllByStatus(FacilityStatus.ACTIVE)
 				.stream().map(FacilityPersistenceMapper:: toDomain)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public FacilityPage findAll(FacilityStatus status, FacilityType type, int page, int size) {
+		
+		Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+		Page<FacilityJpaEntity> result;
+		
+		if(status != null && type != null) {
+			result = jpaRepository.findAllByStatusAndType(status, type, pageable);
+		}else if (status != null) {
+			result = jpaRepository.findAllByStatus(status, pageable);
+		}else if (type != null) {
+			result = jpaRepository.findAllByType(type, pageable);
+		}else {
+			result = jpaRepository.findAll(pageable);
+		}
+		
+		
+		List<Facility> content = result.getContent().stream()
+				.map(FacilityPersistenceMapper :: toDomain)
+				.collect(Collectors.toList());
+		
+		return new FacilityPage(content, result.getTotalElements(),page,size);
 	}
 
 }

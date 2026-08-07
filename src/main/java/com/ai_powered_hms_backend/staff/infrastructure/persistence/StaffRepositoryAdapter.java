@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
+import com.ai_powered_hms_backend.shared_kernel.valueobjects.Email;
 import com.ai_powered_hms_backend.staff.application.port.out.StaffRepository;
 import com.ai_powered_hms_backend.staff.domain.model.StaffProfile;
 import com.ai_powered_hms_backend.staff.domain.valueobjects.EmployeeNumber;
@@ -43,7 +44,7 @@ public class StaffRepositoryAdapter implements StaffRepository{
 	@Override
 	public boolean existsByWorkEmail(String workEmail) {
 		// TODO Auto-generated method stub
-		return jpaRepository.existsByWorkEmail(workEmail);
+		return jpaRepository.existsByWorkEmailValue(new Email(workEmail));
 	}
 
 }
