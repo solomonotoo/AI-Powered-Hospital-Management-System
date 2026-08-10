@@ -6,6 +6,7 @@
 			"shared_kernel :: base",
 			"shared_kernel :: persistence",
 			"shared_kernel :: security",
+			"shared_kernel :: exceptions",
 			"staff :: api"
 		}
 )

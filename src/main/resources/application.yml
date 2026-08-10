@@ -94,7 +94,9 @@ app:
       access-token:
         expiration-minutes: ${JWT_ACCESS_TOKEN_EXPIRY_MINUTES:15}
       refresh-token:
-        expiration-days: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS:30}
+        expiration-days: ${JWT_REFRESH_TOKEN_EXPIRY_DAYS:30}		
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:5173
 #
 #  ai:
 #    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
