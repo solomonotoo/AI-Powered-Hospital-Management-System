@@ -7,7 +7,8 @@
 				"shared_kernel :: base",
 				"shared_kernel :: persistence",
 				"shared_kernel :: security",
-				"shared_kernel :: exceptions"
+				"shared_kernel :: exceptions",
+				"shared_kernel :: rest"
 		}
 		)
 package com.ai_powered_hms_backend.staff;

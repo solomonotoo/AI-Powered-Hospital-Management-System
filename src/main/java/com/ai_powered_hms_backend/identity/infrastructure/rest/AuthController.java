@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ai_powered_hms_backend.identity.application.command.AuthenticationCommand;
+import com.ai_powered_hms_backend.identity.application.command.RefreshTokenCommand;
 import com.ai_powered_hms_backend.identity.application.port.in.AuthenticateUseCase;
+import com.ai_powered_hms_backend.identity.application.port.in.RefreshTokenUseCase;
 
 import jakarta.validation.Valid;
 
@@ -16,17 +18,55 @@ import jakarta.validation.Valid;
 public class AuthController {
 
 	private final AuthenticateUseCase authenticateUseCase;
+	private final RefreshTokenUseCase refreshTokenUseCase;
+	
 
-	public AuthController(AuthenticateUseCase authenticateUseCase) {
+	public AuthController(AuthenticateUseCase authenticateUseCase, RefreshTokenUseCase refreshTokenUseCase) {
+		super();
 		this.authenticateUseCase = authenticateUseCase;
+		this.refreshTokenUseCase = refreshTokenUseCase;
 	}
+
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 		var result = authenticateUseCase.authentication(new AuthenticationCommand(request.email(), request.password()));
 
-		return ResponseEntity.ok(new LoginResponse(result.token().token(), result.token().expireAt().toString(),
-				result.staffId(), result.fullName(), result.role(), result.mustChangePassword()));
+		return ResponseEntity.ok(
+				new LoginResponse(
+					result.accessToken().token(), 
+					result.accessToken().expireAt().toString(),
+					result.refreshToken().token(),
+					result.refreshToken().expireAt().toString(),
+					result.staffId(), 
+					result.fullName(), result.role(),
+					result.mustChangePassword()
+				));
+	}
+	
+	@PostMapping("/refresh")
+	public ResponseEntity<LoginResponse> refresh(
+			@Valid @RequestBody RefreshTokenRequest request
+			){
+		var result =
+				refreshTokenUseCase.refresh(
+						new RefreshTokenCommand(request.refreshToken())
+						);
+		return ResponseEntity.ok(
+				new LoginResponse(
+						result.accessToken().token(),
+                        result.accessToken().expireAt().toString(),
+
+                        result.refreshToken().token(),
+                        result.refreshToken().expireAt().toString(),
+
+                        result.staffId(),
+                        result.fullName(),
+                        result.role(),
+                        result.mustChangePassword()
+						)
+				);
+				
 	}
 
 }

@@ -9,7 +9,7 @@ import com.ai_powered_hms_backend.identity.application.port.out.UserCredentialRe
 import com.ai_powered_hms_backend.identity.domain.model.UserCredential;
 import com.ai_powered_hms_backend.identity.port.in.CreateUserCredentialUseCase;
 import com.ai_powered_hms_backend.staff.application.api.StaffLookup;
-import com.ai_powered_hms_backend.staff.application.api.StaffSummary;
+import com.ai_powered_hms_backend.staff.application.api.StaffLookupSummary;
 
 @Service
 public class CreateUserCredentialService implements CreateUserCredentialUseCase{
@@ -30,8 +30,8 @@ public class CreateUserCredentialService implements CreateUserCredentialUseCase{
 	@Override
 	@Transactional
 	public void create(CreateUserCredentialCommand command) {
-		StaffSummary staff = staffLookup.getById(command.staffId().value());
-		if(!staff.active()) {
+		StaffLookupSummary staff = staffLookup.getById(command.staffId().value());
+		if(!staff.canAuthenticate()) {
 			throw new IllegalStateException("Cannot create credentials for an inactive staff member");
 		}
 		if(credentialRepository.existsByLoginEmail(command.loginEmail().getValue())) {

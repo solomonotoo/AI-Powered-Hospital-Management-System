@@ -11,6 +11,7 @@ import com.ai_powered_hms_backend.shared_kernel.infrastructure.persistence.Phone
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.Email;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.PhoneNumber;
 import com.ai_powered_hms_backend.staff.domain.enums.StaffRole;
+import com.ai_powered_hms_backend.staff.domain.enums.StaffStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -70,8 +71,13 @@ public class StaffJpaEntity {
     @Column(name = "consultation_fee", precision = 10, scale = 2)
     private BigDecimal consultationFee;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean active;
+    
+//    @Column(name = "is_active", nullable = false)
+//    private boolean active;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    private StaffStatus status;
 
     @Embedded
     private AuditMetadataEmbeddable audit;
@@ -82,13 +88,13 @@ public class StaffJpaEntity {
     		UUID id, String employeeNumber, PersonNameEmbeddable fullName, StaffRole role,
             String specialisation, String department, Email workEmail, PhoneNumber phone,
             String licenseNumber, String qualifications, LocalDate joiningDate, LocalDate endDate,
-            String workingHours, BigDecimal consultationFee, boolean active, AuditMetadataEmbeddable audit
+            String workingHours, BigDecimal consultationFee, StaffStatus status, AuditMetadataEmbeddable audit
     		) {
     	 this.id = id; this.employeeNumber = employeeNumber; this.fullName = fullName; this.role = role;
          this.specialisation = specialisation; this.department = department; this.workEmail = workEmail;
          this.phone = phone; this.licenseNumber = licenseNumber; this.qualifications = qualifications;
          this.joiningDate = joiningDate; this.endDate = endDate; this.workingHours = workingHours;
-         this.consultationFee = consultationFee; this.active = active; this.audit = audit;
+         this.consultationFee = consultationFee; this.status = status; this.audit = audit;
   	
     }
 
@@ -148,8 +154,10 @@ public class StaffJpaEntity {
 		return consultationFee;
 	}
 
-	public boolean isActive() {
-		return active;
+	
+
+	public StaffStatus getStatus() {
+		return status;
 	}
 
 	public AuditMetadataEmbeddable getAudit() {

@@ -15,7 +15,7 @@ public class StaffPersistenceMapper {
                 PersonNameMapper.toEmbeddable(staff.fullName()), staff.role(),
                 staff.specialisation(), staff.department(), staff.workEmail(), staff.phone(),
                 staff.licenseNumber(), staff.qualifications(), staff.joiningDate(), staff.endDate(),
-                staff.workingHours(), staff.consultationFee(), staff.isActive(),
+                staff.workingHours(), staff.consultationFee(), staff.status(),
                 AuditMetadataMapper.toEmbeddable(staff.audit())
 			);
 	}
@@ -25,7 +25,7 @@ public class StaffPersistenceMapper {
 				PersonNameMapper.toDomain(entity.getFullName()), entity.getRole(), entity.getSpecialisation(),
 				entity.getDepartment(), entity.getWorkEmail(), entity.getPhone(), entity.getLicenseNumber(),
 				entity.getQualifications(), entity.getJoiningDate(), entity.getEndDate(), entity.getWorkingHours(),
-				entity.getConsultationFee(), entity.isActive(), AuditMetadataMapper.toDomain(entity.getAudit())
+				entity.getConsultationFee(), entity.getStatus(), AuditMetadataMapper.toDomain(entity.getAudit())
 		);
 	}
 }

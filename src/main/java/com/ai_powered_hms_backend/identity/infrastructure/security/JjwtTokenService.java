@@ -1,5 +1,6 @@
 package com.ai_powered_hms_backend.identity.infrastructure.security;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -22,24 +23,35 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JjwtTokenService implements JwtTokenService{
 
+	private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_TYPE = "type";
+
+    private static final String ACCESS_TOKEN = "access";
+    private static final String REFRESH_TOKEN = "refresh";
+    
 	private final SecretKey key;
-	private final long expirationMinutes;
+	private final long accessTokenExpirationMinutes;
+	private final long refreshTokenExpirationDays;
 	public JjwtTokenService(
 			@Value("${app.security.jwt.secret}") String secret, 
-			@Value("${app.security.jwt.access-token.expiration-minutes:60}") long expirationMinutes) {
+			@Value("${app.security.jwt.access-token.expiration-minutes:15}") long accessTokenExpirationMinutes,
+			 @Value("${app.security.jwt.refresh-token.expiration-days:30}")
+	        long refreshTokenExpirationDays) {
 		super();
-		this.key = Keys.hmacShaKeyFor(secret.getBytes());
-		this.expirationMinutes = expirationMinutes;
+		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+		this.accessTokenExpirationMinutes = accessTokenExpirationMinutes;
+		this.refreshTokenExpirationDays = refreshTokenExpirationDays;
 	}
 	
 	@Override
-	public IssuedToken issue(StaffId staffId, String role) {
+	public IssuedToken issueAccessToken(StaffId staffId, String role) {
 		Instant now = Instant.now();
-		Instant expiry = now.plus(expirationMinutes, ChronoUnit.MINUTES);
+		Instant expiry = now.plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES);
 		
 		String token = Jwts.builder()
 				.subject(staffId.value().toString())
-				.claim("role", role)
+				.claim(CLAIM_ROLE, role)
+				.claim(CLAIM_TYPE, ACCESS_TOKEN)
 				.issuedAt(Date.from(now))
 				.expiration(Date.from(expiry))
 				.signWith(key)
@@ -48,17 +60,95 @@ public class JjwtTokenService implements JwtTokenService{
 		return new IssuedToken(token,expiry);
 	}
 	
-	
 	@Override
-	public TokenClaims parse(String token) {
-		Claims claims = Jwts.parser().verifyWith(key).build()
-				.parseSignedClaims(token).getPayload();
-		
-		return new TokenClaims(
-				StaffId.of(UUID.fromString(claims.getSubject())),
-				claims.get("role",String.class)
-				);
-	}
+    public IssuedToken issueRefreshToken(
+            StaffId staffId,
+            String role) {
+
+        Instant now = Instant.now();
+
+        Instant expiry = now.plus(
+                refreshTokenExpirationDays,
+                ChronoUnit.DAYS
+        );
+
+        String token = Jwts.builder()
+                .subject(staffId.value().toString())
+                .claim(CLAIM_ROLE, role)
+                .claim(CLAIM_TYPE, REFRESH_TOKEN)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiry))
+                .signWith(key)
+                .compact();
+
+        return new IssuedToken(token, expiry);
+    }
 	
+//	@Override
+//	public TokenClaims parse(String token) {
+//		Claims claims = Jwts.parser().verifyWith(key).build()
+//				.parseSignedClaims(token).getPayload();
+//		
+//		return new TokenClaims(
+//				StaffId.of(UUID.fromString(claims.getSubject())),
+//				claims.get("role",String.class)
+//				);
+//	}
+	
+	 @Override
+	    public TokenClaims parseAccessToken(String token) {
+
+	        Claims claims = parse(token);
+
+	        validateTokenType(claims, ACCESS_TOKEN);
+
+	        return toTokenClaims(claims);
+	    }
+	
+	 @Override
+	    public TokenClaims parseRefreshToken(String token) {
+
+	        Claims claims = parse(token);
+
+	        validateTokenType(claims, REFRESH_TOKEN);
+
+	        return toTokenClaims(claims);
+	    }
+
+	    private Claims parse(String token) {
+
+	        return Jwts.parser()
+	                .verifyWith(key)
+	                .build()
+	                .parseSignedClaims(token)
+	                .getPayload();
+	    }
+
+	private TokenClaims toTokenClaims(Claims claims) {
+
+        return new TokenClaims(
+                StaffId.of(
+                        UUID.fromString(claims.getSubject())
+                ),
+                claims.get(CLAIM_ROLE, String.class),
+                claims.get(CLAIM_TYPE, String.class)
+        );
+    }
+
+    private void validateTokenType(
+            Claims claims,
+            String expectedType) {
+
+        String actualType = claims.get(
+                CLAIM_TYPE,
+                String.class
+        );
+
+        if (!expectedType.equals(actualType)) {
+            throw new IllegalArgumentException(
+                    "Invalid token type"
+            );
+        }
+    }
 	
 }

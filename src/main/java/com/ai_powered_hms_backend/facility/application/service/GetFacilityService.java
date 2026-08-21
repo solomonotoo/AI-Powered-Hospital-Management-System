@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.ai_powered_hms_backend.facility.application.port.in.GetFacilitiesUseCase;
 import com.ai_powered_hms_backend.facility.application.port.out.FacilityRepository;
 import com.ai_powered_hms_backend.facility.domain.model.Facility;
+import com.ai_powered_hms_backend.facility.infrastructure.rest.dto.FacilitySummaryResponse;
 import com.ai_powered_hms_backend.shared_kernel.ids.FacilityId;
 
 
@@ -25,5 +26,18 @@ public class GetFacilityService implements GetFacilitiesUseCase{
 		return facilityRepository.findById(id)
 				.orElseThrow(() -> new FacilityNotFoundException("No facility found"));
 	}
+
+
+//	@Override
+//	public FacilitySummaryResponse getSummary() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+
+	
+
+
+	
 
 }

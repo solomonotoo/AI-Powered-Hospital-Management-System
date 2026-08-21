@@ -13,6 +13,7 @@ import com.ai_powered_hms_backend.shared_kernel.valueobjects.Email;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.PersonName;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.PhoneNumber;
 import com.ai_powered_hms_backend.staff.domain.enums.StaffRole;
+import com.ai_powered_hms_backend.staff.domain.enums.StaffStatus;
 import com.ai_powered_hms_backend.staff.domain.valueobjects.EmployeeNumber;
 
 
@@ -38,7 +39,7 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 	private LocalDate endDate;
 	private String workingHours;
 	private BigDecimal consultationFee; // doctors only, nullable
-	private boolean active;
+	private StaffStatus status;
 	private AuditMetadata audit;
 	
 	
@@ -69,7 +70,7 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 			throw new IllegalArgumentException("License number is required for role");
 		}
 		
-		this.active = true;
+		this.status = StaffStatus.ACTIVE;
 		this.audit = AuditMetadata.create(createdBy);
 	}
 
@@ -82,7 +83,7 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 			StaffId id, EmployeeNumber employeeNumber, PersonName fullName, StaffRole role,
 			String specialisation, String department, Email workEmail, PhoneNumber phone, String licenseNumber,
 			String qualifications, LocalDate joiningDate, LocalDate endDate, String workingHours,
-			BigDecimal consultationFee, boolean active, AuditMetadata audit) {
+			BigDecimal consultationFee, StaffStatus status, AuditMetadata audit) {
 		super(id);
 		this.employeeNumber = employeeNumber;
 		this.fullName = fullName;
@@ -97,7 +98,7 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 		this.endDate = endDate;
 		this.workingHours = workingHours;
 		this.consultationFee = consultationFee;
-		this.active = active;
+		this.status = Objects.requireNonNull(status,"Status is required");
 		this.audit = Objects.requireNonNull(audit, "Audit metadata is required");
 	}
 	
@@ -127,12 +128,12 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 			StaffId id, EmployeeNumber employeeNumber, PersonName fullName, StaffRole role,
 			String specialisation, String department, Email workEmail, PhoneNumber phone, String licenseNumber,
 			String qualifications, LocalDate joiningDate, LocalDate endDate, String workingHours,
-			BigDecimal consultationFee, boolean active, AuditMetadata audit
+			BigDecimal consultationFee, StaffStatus status, AuditMetadata audit
 			) {
 		return new StaffProfile(
 			id, employeeNumber, fullName, role, specialisation, department, workEmail, phone,
 			licenseNumber, qualifications, joiningDate, endDate, workingHours, consultationFee,
-			active, audit
+			status, audit
 		);
 	}
 	
@@ -183,16 +184,25 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 		}
 		
 		this.endDate = enddDate;
-		this.active = false;
-		recordChangeBy(modifiedBy);
+		changeStatus(StaffStatus.INACTIVE, modifiedBy);
 	}
 	
 	public void reinstate(UUID modifiedBy) {
 		this.endDate = null;
-		this.active = true;
-		recordChangeBy(modifiedBy);
+		changeStatus(StaffStatus.ACTIVE, modifiedBy);
 	}
 	
+	
+	public void changeStatus(StaffStatus newStatus, UUID modified) {
+		Objects.requireNonNull(newStatus, "Status must not br null");
+		if(this.status == newStatus) return;//no-op, avoid pointless audit touch
+		this.status = newStatus;
+		recordChangeBy(modified);
+	}
+	
+	public boolean canAuthenticate() {
+	    return status == StaffStatus.ACTIVE || status == StaffStatus.ON_DUTY;
+	}
 	
 	private void recordChangeBy(UUID modifiedBy) {
 		Objects.requireNonNull(modifiedBy,"Modified by must not be null");
@@ -218,7 +228,7 @@ public class StaffProfile extends AggregateRoot<StaffId>{
     public LocalDate endDate() { return endDate; }
     public String workingHours() { return workingHours; }
     public BigDecimal consultationFee() { return consultationFee; }
-    public boolean isActive() { return active; }
+    public StaffStatus status() { return status; }
     public AuditMetadata audit() { return audit; }
 	
 

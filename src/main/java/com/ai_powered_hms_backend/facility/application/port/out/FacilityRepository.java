@@ -3,6 +3,7 @@ package com.ai_powered_hms_backend.facility.application.port.out;
 import java.util.List;
 import java.util.Optional;
 
+import com.ai_powered_hms_backend.facility.application.query.FacilitySummaryResult;
 import com.ai_powered_hms_backend.facility.domain.eums.FacilityStatus;
 import com.ai_powered_hms_backend.facility.domain.eums.FacilityType;
 import com.ai_powered_hms_backend.facility.domain.model.Facility;
@@ -27,4 +28,5 @@ public interface FacilityRepository {
     /** Paginated, optionally filtered listing for the admin facility list screen. */
 	FacilityPage findAll(FacilityStatus status, FacilityType type,int page, int size);
 	
+	FacilitySummaryResult getSummary();
 }

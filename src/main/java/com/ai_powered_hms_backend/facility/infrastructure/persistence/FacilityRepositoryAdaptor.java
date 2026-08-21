@@ -1,6 +1,7 @@
 package com.ai_powered_hms_backend.facility.infrastructure.persistence;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.ai_powered_hms_backend.facility.application.port.out.FacilityPage;
 import com.ai_powered_hms_backend.facility.application.port.out.FacilityRepository;
+import com.ai_powered_hms_backend.facility.application.query.FacilitySummaryResult;
 import com.ai_powered_hms_backend.facility.domain.eums.FacilityStatus;
 import com.ai_powered_hms_backend.facility.domain.eums.FacilityType;
 import com.ai_powered_hms_backend.facility.domain.model.Facility;
@@ -87,5 +89,25 @@ public class FacilityRepositoryAdaptor  implements FacilityRepository{
 		
 		return new FacilityPage(content, result.getTotalElements(),page,size);
 	}
+
+//	Three lightweight queries total (two COUNT, one GROUP BY) — no facility rows ever 
+//	loaded into the JVM just to be counted, which matters once you have hundreds of facilities 
+//	across regions.
+	@Override
+	public FacilitySummaryResult getSummary() {
+		long active = jpaRepository.countByStatus(FacilityStatus.ACTIVE);
+		long inactive = jpaRepository.countByStatus(FacilityStatus.INACTIVE);
+		long pending = jpaRepository.countByStatus(FacilityStatus.PENDING_APPROVAL);
+		
+		Map<FacilityType, Long> byType = jpaRepository.countGroupedByType().stream()
+				.collect(Collectors.toMap(
+						FacilityJpaRepository.FacilityTypeCount::getType,
+						FacilityJpaRepository.FacilityTypeCount::getTotal
+						));
+		
+		return new FacilitySummaryResult(active + inactive, active, inactive, pending, byType);
+	}
+	
+	
 
 }

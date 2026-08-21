@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	    @Override
 	    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	            throws ServletException, IOException {
-	    	 System.out.println(">>> JwtAuthenticationFilter.doFilterInternal CALLED for " + request.getRequestURI());
+	    	// System.out.println(">>> JwtAuthenticationFilter.doFilterInternal CALLED for " + request.getRequestURI());
 
 	        String header = request.getHeader("Authorization");
 
@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	        
 	        if (header != null && header.startsWith("Bearer ")) {
 	            try {
-	               TokenClaims claims = jwtTokenService.parse(header.substring(7));
+	               TokenClaims claims = jwtTokenService.parseAccessToken(header.substring(7));
 
 	               LOGGER.info("JWT parsed successfully — staffId={}, role={}", claims.staffId(), claims.role());
 
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	                
 	            
 	            } catch (Exception e) {
-	            	LOGGER.warn("JWT authentication failed: {}", e.getMessage());
+	            	LOGGER.warn("JWT authentication failed: {}", request.getRequestURI(), e);
 	                SecurityContextHolder.clearContext();
 	            }
 	        }else {
@@ -67,5 +67,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 			}
 
 	        chain.doFilter(request, response);
+	    }
+	    
+	    @Override
+	    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+	        String path = request.getServletPath();
+
+	        return path.startsWith("/swagger-ui/")
+	                || path.startsWith("/api-docs")
+	                || path.equals("/favicon.ico");
 	    }
 }

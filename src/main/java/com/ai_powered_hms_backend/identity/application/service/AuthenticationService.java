@@ -12,7 +12,7 @@ import com.ai_powered_hms_backend.identity.application.port.out.UserCredentialRe
 import com.ai_powered_hms_backend.identity.domain.model.UserCredential;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
 import com.ai_powered_hms_backend.staff.application.api.StaffLookup;
-import com.ai_powered_hms_backend.staff.application.api.StaffSummary;
+import com.ai_powered_hms_backend.staff.application.api.StaffLookupSummary;
 
 @Service
 public class AuthenticationService implements AuthenticateUseCase {
@@ -54,20 +54,22 @@ public class AuthenticationService implements AuthenticateUseCase {
 		//assigned the credentials to staff id
 		StaffId staffId = credential.staffId();
 		//get staff summary 
-		StaffSummary staff = staffLookup.getById(staffId.value());
+		StaffLookupSummary staff = staffLookup.getById(staffId.value());
 	
 		//throws exception if staff is not active
-		if(!staff.active()) {
-			throw new InvalidCredentialsException("Staff record is active");
+		if(!staff.canAuthenticate()) {
+			throw new InvalidCredentialsException("Staff record is inactive");
 		}
 		
 		//
-		IssuedToken token = jwtTokenService.issue(staffId, staff.role());
+		IssuedToken accessToken = jwtTokenService.issueAccessToken(staffId, staff.role());
+		
+		IssuedToken refreshToken = jwtTokenService.issueRefreshToken(staffId, staff.role());
 		
 		credential.recordSuccessfulLogin();
 		credentialRepository.save(credential);
 		
-		return new AuthResult(token, staffId.value().toString(), staff.fullName(), staff.role(), credential.mustChangePassword());
+		return new AuthResult(accessToken,refreshToken, staffId.value().toString(), staff.fullName(), staff.role(), credential.mustChangePassword());
 	}
 
 }

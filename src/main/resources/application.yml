@@ -65,7 +65,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,modulith
+        include: health,info,metrics,prometheus,modulith,mappings
   endpoint:
     health:
       show-details: when-authorized
