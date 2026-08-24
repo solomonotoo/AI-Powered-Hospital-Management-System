@@ -15,11 +15,16 @@ public class SecurityConfig {
 
 	private final CorsConfigurationSource corsConfigurationSource;
 
-	private final Filter jwtAuthenticationFilter;
+	private final JwtTokenService jwtAuthenticationFilter;
+	private final SessionRepository sessionRepository;
 
-	public SecurityConfig(Filter jwtAuthenticationFilter, CorsConfigurationSource corsConfigurationSource) {
+	public SecurityConfig(
+		JwtTokenService jwtAuthenticationFilter,
+	 CorsConfigurationSource corsConfigurationSource,
+	 SessionRepository sessionRepository) {
 		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
 		this.corsConfigurationSource = corsConfigurationSource;
+		this.sessionRepository = sessionRepository;
 	}
 
 //	private final JwtTokenService jwtTokenService;
@@ -33,8 +38,8 @@ public class SecurityConfig {
 		// Constructed directly — never registered as a Spring bean, so no
 		// BeanPostProcessor (Modulith observability, Micrometer tracing, etc.)
 		// can wrap it in a JDK dynamic proxy.
-		// JwtAuthenticationFilter jwtAuthenticationFilter = new
-		// JwtAuthenticationFilter(jwtTokenService);
+		JwtAuthenticationFilter jwtAuthenticationFilter = new
+		JwtAuthenticationFilter(jwtTokenService,sessionRepository);
 
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource)).csrf(csrf -> csrf.disable())
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

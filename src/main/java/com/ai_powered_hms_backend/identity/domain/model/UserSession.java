@@ -34,6 +34,13 @@ public final class UserSession extends AggregateRoot<SessionId>{
 		return new UserSession(id, staffId, issuedAt, expiresAt, userAgent, revoked);
 	}
 	
+	//renew session
+	public void renew(LocalDateTime newExpireAt){
+		if(revoked){
+			throw new IllegalStateException("Cannot renew a revoked session");
+		}
+		this.expiresAt = newExpireAt;
+	}
 	public void revoke() {
 		this.revoked = true;
 	}

@@ -55,14 +55,14 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 		
 		StaffId staffId = claims.staffId();
 		
-		 /*
-	     * Preserve the existing login session.
-	     *
-	     * The new access token and rotated refresh token
-	     * must belong to the same session.
-	     */
-		UUID sessionId = claims.sessionId();
-		
+		 
+		 UserSession session = sessionRepository.findById(SessionId.of(claims.sessionId()))
+				.orElseThrow(() -> new InvalidCredentialsException("Session not found"));
+
+		if (!session.isValid()) {
+			throw new InvalidCredentialsException("Session has been revoked or expired");
+		}
+
 		 /*
          * 2. Load the user's credentials.
          *
@@ -103,7 +103,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
          * 6. Issue a new access token.
          */
 		IssuedToken accessToken = 
-			jwtTokenService.issueAccessToken(staffId, staff.role(),sessionId);
+			jwtTokenService.issueAccessToken(staffId, staff.role(),claims.sessionId);
 		
 		/*
          * 7. Rotate the refresh token.
@@ -112,10 +112,17 @@ public class RefreshTokenService implements RefreshTokenUseCase {
                 jwtTokenService.issueRefreshToken(
                         staffId,
                         staff.role(),
-                        sessionId
-                        
+                        claims.sessionId
                 );
 		
+/*
+         * 9. Extend the session's tracked lifetime to match the new
+         *    refresh token's expiry, and persist it.
+         */
+        session.renew(LocalDateTime.ofInstant(refreshToken.expireAt(), ZoneId.systemDefault()));
+        sessionRepository.save(session);
+
+
         /*
          * 8. Return the new authentication information.
          */
@@ -125,7 +132,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 				staffId.value().toString(),
 				staff.fullName(),
 				staff.role(),
-				false);
+				credential.mustChangePassword());// was hardcoded false — now reflects real state
 	}
 
 }

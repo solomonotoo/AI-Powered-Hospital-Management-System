@@ -73,4 +73,11 @@ public class AuthController {
 				
 	}
 
+	@DeleteMapping("/users/{userId}/sessions/{sessionId}")
+	@PreAuthorize(SELF_OR_ADMIN)
+	public ResponseEntity<Void> revokeSession(@PathVariable UUID sessionId) {
+	    sessionQueryService.revoke(SessionId.of(sessionId));
+	    return ResponseEntity.noContent().build();
+}
+
 }
