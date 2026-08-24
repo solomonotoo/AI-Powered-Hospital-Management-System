@@ -1,5 +1,7 @@
 package com.ai_powered_hms_backend.identity.application.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -7,6 +9,7 @@ import com.ai_powered_hms_backend.identity.application.command.RefreshTokenComma
 import com.ai_powered_hms_backend.identity.application.port.in.RefreshTokenUseCase;
 import com.ai_powered_hms_backend.identity.application.port.out.IssuedToken;
 import com.ai_powered_hms_backend.identity.application.port.out.JwtTokenService;
+import com.ai_powered_hms_backend.identity.application.port.out.SessionRepository;
 import com.ai_powered_hms_backend.identity.application.port.out.TokenClaims;
 import com.ai_powered_hms_backend.identity.application.port.out.UserCredentialRepository;
 import com.ai_powered_hms_backend.identity.domain.model.UserCredential;
@@ -20,14 +23,18 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 	private final JwtTokenService jwtTokenService;
 	private final UserCredentialRepository credentialRepository;
 	private final StaffLookup staffLookup;
-	
-	public RefreshTokenService(JwtTokenService jwtTokenService,
-			UserCredentialRepository credentialRepository,
-			StaffLookup staffLookup) {
-		super();
-		this.jwtTokenService = jwtTokenService;
-		this.credentialRepository=credentialRepository;
-		this.staffLookup = staffLookup;
+	private final SessionRepository sessionRepository;
+
+	public RefreshTokenService(
+	        JwtTokenService jwtTokenService,
+	        UserCredentialRepository credentialRepository,
+	        StaffLookup staffLookup,
+	        SessionRepository sessionRepository) {
+
+	    this.jwtTokenService = jwtTokenService;
+	    this.credentialRepository = credentialRepository;
+	    this.staffLookup = staffLookup;
+	    this.sessionRepository = sessionRepository;
 	}
 
 
@@ -47,6 +54,14 @@ public class RefreshTokenService implements RefreshTokenUseCase {
 		TokenClaims claims = jwtTokenService.parseRefreshToken(command.refreshToken());
 		
 		StaffId staffId = claims.staffId();
+		
+		 /*
+	     * Preserve the existing login session.
+	     *
+	     * The new access token and rotated refresh token
+	     * must belong to the same session.
+	     */
+		UUID sessionId = claims.sessionId();
 		
 		 /*
          * 2. Load the user's credentials.
@@ -88,7 +103,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
          * 6. Issue a new access token.
          */
 		IssuedToken accessToken = 
-			jwtTokenService.issueAccessToken(staffId, staff.role());
+			jwtTokenService.issueAccessToken(staffId, staff.role(),sessionId);
 		
 		/*
          * 7. Rotate the refresh token.
@@ -96,7 +111,9 @@ public class RefreshTokenService implements RefreshTokenUseCase {
         IssuedToken refreshToken =
                 jwtTokenService.issueRefreshToken(
                         staffId,
-                        staff.role()
+                        staff.role(),
+                        sessionId
+                        
                 );
 		
         /*

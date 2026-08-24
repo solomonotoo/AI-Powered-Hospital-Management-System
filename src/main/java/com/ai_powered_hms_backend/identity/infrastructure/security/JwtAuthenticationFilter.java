@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.ai_powered_hms_backend.identity.application.port.out.JwtTokenService;
+import com.ai_powered_hms_backend.identity.application.port.out.SessionRepository;
 import com.ai_powered_hms_backend.identity.application.port.out.TokenClaims;
 import com.ai_powered_hms_backend.shared_kernel.infrastructure.security.AuthenticatedPrincipal;
 
@@ -26,12 +27,15 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	private static final Logger LOGGER = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 	 private final JwtTokenService jwtTokenService;
+	 private final SessionRepository sessionRepository;
+	    
 
-	    public JwtAuthenticationFilter(JwtTokenService jwtTokenService) {
-	        this.jwtTokenService = jwtTokenService;
-	    }
+	    public JwtAuthenticationFilter(JwtTokenService jwtTokenService, SessionRepository sessionRepository) {
+		this.jwtTokenService = jwtTokenService;
+		this.sessionRepository = sessionRepository;
+	}
 
-	    @Override
+		@Override
 	    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 	            throws ServletException, IOException {
 	    	// System.out.println(">>> JwtAuthenticationFilter.doFilterInternal CALLED for " + request.getRequestURI());
@@ -45,6 +49,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	            try {
 	               TokenClaims claims = jwtTokenService.parseAccessToken(header.substring(7));
 
+	               //check session validity, not just signature
+	               if(!sessionRepository.isValid(claims.sessionId())) {
+	            	LOGGER.warn("Rejected request - session {} is revoked or expired", claims.sessionId());   
+	            	SecurityContextHolder.clearContext();
+	            	chain.doFilter(request, response);
+	            	return;
+	               
+	               }
+	               
 	               LOGGER.info("JWT parsed successfully — staffId={}, role={}", claims.staffId(), claims.role());
 
 	                AuthenticatedPrincipal principal = new AuthenticatedPrincipal(claims.staffId(), claims.role());

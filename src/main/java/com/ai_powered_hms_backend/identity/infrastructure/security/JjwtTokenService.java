@@ -28,6 +28,7 @@ public class JjwtTokenService implements JwtTokenService{
 
     private static final String ACCESS_TOKEN = "access";
     private static final String REFRESH_TOKEN = "refresh";
+    private static final String CLAIM_SESSION_ID = "sid";
     
 	private final SecretKey key;
 	private final long accessTokenExpirationMinutes;
@@ -43,8 +44,15 @@ public class JjwtTokenService implements JwtTokenService{
 		this.refreshTokenExpirationDays = refreshTokenExpirationDays;
 	}
 	
+	
+//Embed a sessionId claim in both tokens at issuance. The access token stays 
+//short-lived and mostly stateless (no DB hit needed for normal expiry), but 
+//JwtAuthenticationFilter can still check sessionId against a revocation 
+//flag — so DELETE /sessions/{sessionId} takes effect immediately on the next request,
+//rather than waiting up to 15 minutes for the access token to naturally expire.
+	
 	@Override
-	public IssuedToken issueAccessToken(StaffId staffId, String role) {
+	public IssuedToken issueAccessToken(StaffId staffId, String role, UUID sessionId) {
 		Instant now = Instant.now();
 		Instant expiry = now.plus(accessTokenExpirationMinutes, ChronoUnit.MINUTES);
 		
@@ -52,18 +60,19 @@ public class JjwtTokenService implements JwtTokenService{
 				.subject(staffId.value().toString())
 				.claim(CLAIM_ROLE, role)
 				.claim(CLAIM_TYPE, ACCESS_TOKEN)
+				.claim(CLAIM_SESSION_ID, sessionId.toString())
 				.issuedAt(Date.from(now))
 				.expiration(Date.from(expiry))
 				.signWith(key)
 				.compact();
 				
-		return new IssuedToken(token,expiry);
+		return new IssuedToken(token,expiry,sessionId);
 	}
 	
 	@Override
     public IssuedToken issueRefreshToken(
             StaffId staffId,
-            String role) {
+            String role, UUID sessionId) {
 
         Instant now = Instant.now();
 
@@ -76,12 +85,13 @@ public class JjwtTokenService implements JwtTokenService{
                 .subject(staffId.value().toString())
                 .claim(CLAIM_ROLE, role)
                 .claim(CLAIM_TYPE, REFRESH_TOKEN)
+                .claim(CLAIM_SESSION_ID, sessionId.toString())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(key)
                 .compact();
 
-        return new IssuedToken(token, expiry);
+        return new IssuedToken(token, expiry,sessionId);
     }
 	
 //	@Override
@@ -131,7 +141,8 @@ public class JjwtTokenService implements JwtTokenService{
                         UUID.fromString(claims.getSubject())
                 ),
                 claims.get(CLAIM_ROLE, String.class),
-                claims.get(CLAIM_TYPE, String.class)
+                claims.get(CLAIM_TYPE, String.class),
+                UUID.fromString(claims.get(CLAIM_SESSION_ID, String.class))
         );
     }
 

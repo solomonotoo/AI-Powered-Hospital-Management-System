@@ -1,5 +1,7 @@
 package com.ai_powered_hms_backend.identity.infrastructure.rest;
 
+
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +13,7 @@ import com.ai_powered_hms_backend.identity.application.command.RefreshTokenComma
 import com.ai_powered_hms_backend.identity.application.port.in.AuthenticateUseCase;
 import com.ai_powered_hms_backend.identity.application.port.in.RefreshTokenUseCase;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -29,8 +32,9 @@ public class AuthController {
 
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-		var result = authenticateUseCase.authentication(new AuthenticationCommand(request.email(), request.password()));
+	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request,HttpServletRequest httpRequest) {
+		var result = authenticateUseCase.authentication(new AuthenticationCommand(request.email(), request.password(),
+				httpRequest.getHeader("User-Agent")));
 
 		return ResponseEntity.ok(
 				new LoginResponse(
