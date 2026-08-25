@@ -8,6 +8,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.ai_powered_hms_backend.identity.application.port.out.JwtTokenService;
+import com.ai_powered_hms_backend.identity.application.port.out.SessionRepository;
+
 import jakarta.servlet.Filter;
 
 @Configuration
@@ -15,14 +18,14 @@ public class SecurityConfig {
 
 	private final CorsConfigurationSource corsConfigurationSource;
 
-	private final JwtTokenService jwtAuthenticationFilter;
+	private final JwtTokenService jwtTokenService;
 	private final SessionRepository sessionRepository;
 
 	public SecurityConfig(
-		JwtTokenService jwtAuthenticationFilter,
+		JwtTokenService jwtTokenService,
 	 CorsConfigurationSource corsConfigurationSource,
 	 SessionRepository sessionRepository) {
-		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+		this.jwtTokenService = jwtTokenService;
 		this.corsConfigurationSource = corsConfigurationSource;
 		this.sessionRepository = sessionRepository;
 	}

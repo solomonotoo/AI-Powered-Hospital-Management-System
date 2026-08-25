@@ -2,7 +2,15 @@ package com.ai_powered_hms_backend.identity.infrastructure.rest;
 
 
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +20,11 @@ import com.ai_powered_hms_backend.identity.application.command.AuthenticationCom
 import com.ai_powered_hms_backend.identity.application.command.RefreshTokenCommand;
 import com.ai_powered_hms_backend.identity.application.port.in.AuthenticateUseCase;
 import com.ai_powered_hms_backend.identity.application.port.in.RefreshTokenUseCase;
+import com.ai_powered_hms_backend.identity.application.service.SessionQueryService;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.SessionResponse;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.SessionResponseMapper;
+import com.ai_powered_hms_backend.shared_kernel.ids.SessionId;
+import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,14 +35,16 @@ public class AuthController {
 
 	private final AuthenticateUseCase authenticateUseCase;
 	private final RefreshTokenUseCase refreshTokenUseCase;
-	
+	private final SessionQueryService sessionQueryService;
+	private static final String SELF_OR_ADMIN = "#userId.toString() == authentication.principal.staffId().value().toString() or hasAnyRole('ADMIN','SUPER_ADMIN')";
 
-	public AuthController(AuthenticateUseCase authenticateUseCase, RefreshTokenUseCase refreshTokenUseCase) {
+	public AuthController(AuthenticateUseCase authenticateUseCase, RefreshTokenUseCase refreshTokenUseCase,
+			SessionQueryService sessionQueryService) {
 		super();
 		this.authenticateUseCase = authenticateUseCase;
 		this.refreshTokenUseCase = refreshTokenUseCase;
+		this.sessionQueryService = sessionQueryService;
 	}
-
 
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request,HttpServletRequest httpRequest) {
@@ -72,11 +87,24 @@ public class AuthController {
 				);
 				
 	}
+	
+	@GetMapping("/users/{userId}/sessions")
+	@PreAuthorize(SELF_OR_ADMIN)
+	public ResponseEntity<List<SessionResponse>> getSessions(@PathVariable UUID userId){
+		List<SessionResponse> sessions = sessionQueryService.listForUser(StaffId.of(userId))
+				.stream()
+				.map(SessionResponseMapper::toResponse)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(sessions);
+	}
 
 	@DeleteMapping("/users/{userId}/sessions/{sessionId}")
 	@PreAuthorize(SELF_OR_ADMIN)
-	public ResponseEntity<Void> revokeSession(@PathVariable UUID sessionId) {
-	    sessionQueryService.revoke(SessionId.of(sessionId));
+	public ResponseEntity<Void> revokeSession(
+			@PathVariable UUID userId,
+			@PathVariable UUID sessionId
+			) {
+	    sessionQueryService.revokeIfOwnedBy(SessionId.of(sessionId), StaffId.of(userId));
 	    return ResponseEntity.noContent().build();
 }
 

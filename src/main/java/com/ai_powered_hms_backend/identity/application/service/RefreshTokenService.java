@@ -1,5 +1,7 @@
 package com.ai_powered_hms_backend.identity.application.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import com.ai_powered_hms_backend.identity.application.port.out.SessionRepositor
 import com.ai_powered_hms_backend.identity.application.port.out.TokenClaims;
 import com.ai_powered_hms_backend.identity.application.port.out.UserCredentialRepository;
 import com.ai_powered_hms_backend.identity.domain.model.UserCredential;
+import com.ai_powered_hms_backend.identity.domain.model.UserSession;
+import com.ai_powered_hms_backend.shared_kernel.ids.SessionId;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
 import com.ai_powered_hms_backend.staff.application.api.StaffLookup;
 import com.ai_powered_hms_backend.staff.application.api.StaffLookupSummary;
@@ -103,7 +107,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
          * 6. Issue a new access token.
          */
 		IssuedToken accessToken = 
-			jwtTokenService.issueAccessToken(staffId, staff.role(),claims.sessionId);
+			jwtTokenService.issueAccessToken(staffId, staff.role(),claims.sessionId());
 		
 		/*
          * 7. Rotate the refresh token.
@@ -112,7 +116,7 @@ public class RefreshTokenService implements RefreshTokenUseCase {
                 jwtTokenService.issueRefreshToken(
                         staffId,
                         staff.role(),
-                        claims.sessionId
+                        claims.sessionId()
                 );
 		
 /*

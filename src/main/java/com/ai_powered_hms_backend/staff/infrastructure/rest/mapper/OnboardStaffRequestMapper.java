@@ -15,8 +15,8 @@ public class OnboardStaffRequestMapper {
 	public static OnboardStaffCommand toCommand(OnboardStaffRequest r, UUID createdBy) {
 		return new OnboardStaffCommand(
 				
-				new EmployeeNumber(r.employeeNumber()),
-				new PersonName(r.firstName(), r.lastName()),
+				new EmployeeNumber(r.employeeNumbe()),
+				new PersonName(r.firstName(), r.lastname()),
 				StaffRole.valueOf(r.role().toUpperCase()),
 				r.specialisation(),r.department(),new Email(r.workEmail()),
 				r.phone() == null ? null : new PhoneNumber(r.phone()),
