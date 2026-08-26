@@ -38,9 +38,6 @@ public class FacilityController {
     private final GetFacilitySummaryUseCase getFacilitySummaryUseCase;
 
    
-
-   
-
 	public FacilityController(
 			OnboardFacilityUseCase onboardFacilityUseCase, GetFacilitiesUseCase getFacilityUseCase,
 			ListFacilitiesUseCase listFacilitiesUseCase, UpdateFacilityUseCase updateFacilityUseCase,
@@ -56,7 +53,7 @@ public class FacilityController {
 	}
 
 	@PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('FACILITY_MANAGE')")
     public ResponseEntity<FacilityResponse> onboard(
             @Valid @RequestBody OnboardFacilityRequest request,
             @CurrentUserId UUID currentUserId
@@ -118,7 +115,7 @@ public class FacilityController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('FACILITY_MANAGE')")
     public ResponseEntity<FacilityResponse> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateFacilityRequest request,

@@ -34,7 +34,7 @@ public class RoleJpaEntity {
     private String description;
 	
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "role_permission", joinColumns = @JoinColumn(name="role_id"))
+	@CollectionTable(name = "role_permissions", joinColumns = @JoinColumn(name="role_id"))
 	@Column(name = "permission_code")
     private Set<String> permissionCodes;
 	

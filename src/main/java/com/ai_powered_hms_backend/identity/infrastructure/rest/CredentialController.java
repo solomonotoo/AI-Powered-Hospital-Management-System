@@ -26,7 +26,7 @@ public class CredentialController {
 	
 	
 	@PostMapping
-	@PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')") //Guard create credentials
+	@PreAuthorize("hasAuthority('USER_MANAGE')") //Guard create credentials
 	public ResponseEntity<Void> create(
 			@Valid @RequestBody CreateCredentialRequest request
 			){

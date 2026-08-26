@@ -10,6 +10,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.ai_powered_hms_backend.identity.application.port.out.JwtTokenService;
 import com.ai_powered_hms_backend.identity.application.port.out.SessionRepository;
+import com.ai_powered_hms_backend.identity.application.service.UserAccessService;
 
 import jakarta.servlet.Filter;
 
@@ -20,15 +21,20 @@ public class SecurityConfig {
 
 	private final JwtTokenService jwtTokenService;
 	private final SessionRepository sessionRepository;
+	private final UserAccessService userAccessService;
 
-	public SecurityConfig(
-		JwtTokenService jwtTokenService,
-	 CorsConfigurationSource corsConfigurationSource,
-	 SessionRepository sessionRepository) {
-		this.jwtTokenService = jwtTokenService;
+	
+
+public SecurityConfig(CorsConfigurationSource corsConfigurationSource, JwtTokenService jwtTokenService,
+			SessionRepository sessionRepository, UserAccessService userAccessService) {
+		super();
 		this.corsConfigurationSource = corsConfigurationSource;
+		this.jwtTokenService = jwtTokenService;
 		this.sessionRepository = sessionRepository;
+		this.userAccessService = userAccessService;
 	}
+
+
 
 //	private final JwtTokenService jwtTokenService;
 //
@@ -40,9 +46,12 @@ public class SecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		// Constructed directly — never registered as a Spring bean, so no
 		// BeanPostProcessor (Modulith observability, Micrometer tracing, etc.)
-		// can wrap it in a JDK dynamic proxy.
-		JwtAuthenticationFilter jwtAuthenticationFilter = new
-		JwtAuthenticationFilter(jwtTokenService,sessionRepository);
+		// @EnableMethodSecurity's AOP infra) can wrap it in a JDK dynamic proxy.
+		JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(
+				jwtTokenService,
+				sessionRepository,
+				userAccessService
+				);
 
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource)).csrf(csrf -> csrf.disable())
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
