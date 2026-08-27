@@ -32,6 +32,8 @@ public class RoleAssignmentJpaEntity {
 
     @Embedded
     AuditMetadataEmbeddable audit;
+    
+    protected RoleAssignmentJpaEntity(){}
 
 	public RoleAssignmentJpaEntity(UUID id, UUID staffId, UUID roleId, LocalDateTime expiresAt, boolean revoked,
 			AuditMetadataEmbeddable audit) {

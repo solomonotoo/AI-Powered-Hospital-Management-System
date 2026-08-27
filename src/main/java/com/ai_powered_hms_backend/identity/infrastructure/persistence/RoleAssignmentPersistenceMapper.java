@@ -18,9 +18,12 @@ public class RoleAssignmentPersistenceMapper {
 	}
 	
 	public static RoleAssignment toDomain(RoleAssignmentJpaEntity entity) {
-		return RoleAssignment.reconstitute(RoleAssignmentId.of(entity.getId()),
-				StaffId.of(entity.getId()), RoleId.of(entity.getId()), 
-				entity.getExpiresAt(), entity.isRevoked(), 
+		return RoleAssignment.reconstitute(
+				RoleAssignmentId.of(entity.getId()),
+				StaffId.of(entity.getStaffId()),
+				RoleId.of(entity.getRoleId()), 
+				entity.getExpiresAt(), 
+				entity.isRevoked(), 
 				AuditMetadataMapper.toDomain(entity.getAudit()));
 	}
 }

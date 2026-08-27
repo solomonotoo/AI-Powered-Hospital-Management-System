@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import com.ai_powered_hms_backend.identity.application.port.out.RoleRepository;
 import com.ai_powered_hms_backend.identity.application.port.out.UserActivityRepository;
 import com.ai_powered_hms_backend.identity.domain.model.RoleAssignment;
 import com.ai_powered_hms_backend.identity.infrastructure.PermissionCacheConfig;
+import com.ai_powered_hms_backend.identity.infrastructure.security.JwtAuthenticationFilter;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleAssignmentId;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleId;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
@@ -23,7 +26,7 @@ import com.ai_powered_hms_backend.staff.application.api.StaffLookup;
 
 @Service
 public class UserAccessService {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserAccessService.class);
 	private final RoleAssignmentRepository assignmentRepository;
 	private final RoleRepository roleRepository;
 	private final UserActivityRepository activityRepository;
@@ -54,11 +57,22 @@ public class UserAccessService {
      */
     @Cacheable(value = PermissionCacheConfig.EFFECTIVE_PERMISSIONS_CACHE, key = "#staffId.value()")
     public Set<String> effectivePermissions(StaffId staffId) {
-        return assignmentRepository.findByStaffId(staffId).stream()
+        
+    	Set<String> permissions = assignmentRepository.findByStaffId(staffId).stream()
                 .filter(RoleAssignment::isActive)
-                .map(a -> roleRepository.findById(a.roleId()).orElseThrow())
+                .map(a -> roleRepository.findById(a.roleId()).orElseThrow(() -> new IllegalStateException(
+                "Data integrity error: RoleAssignment " + a.assignmentId().value()
+                        + " references non-existent Role " + a.roleId().value())))
                 .flatMap(r -> r.permissionCodes().stream())
                 .collect(Collectors.toSet());
+    	
+    	 LOGGER.info(
+    	            "Effective permissions for staff {}: {}",
+    	            staffId.value(),
+    	            permissions
+    	    );
+
+    	    return permissions;
     }
 	
  

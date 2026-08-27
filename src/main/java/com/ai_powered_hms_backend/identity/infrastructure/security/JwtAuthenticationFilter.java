@@ -73,6 +73,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	                // the cache (fast) or the DB (on cache miss/eviction).
 	               Set<String> permissions = userAccessService.effectivePermissions(claims.staffId()); 
 	               
+	               LOGGER.info(
+	            		    "JWT AUTH - staffId={}, role={}, permissions={}",
+	            		    claims.staffId(),
+	            		    claims.role(),
+	            		    permissions
+	            		);
+	               
 	               List<GrantedAuthority> authorities = permissions.stream()
 	            		   .map(SimpleGrantedAuthority::new)
 	            		   .collect(Collectors.toList());
@@ -89,7 +96,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	                
 	                SecurityContextHolder.getContext().setAuthentication(authentication);
 	          
-	                LOGGER.info("Authentication set in SecurityContext with authority ROLE_{}", claims.role());
+	                LOGGER.info(
+	                	    "Authentication set: staffId={}, role={}, authorities={}",
+	                	    claims.staffId(),
+	                	    claims.role(),
+	                	    authorities
+	                	);
 	                
 	            
 	            } catch (Exception e) {
