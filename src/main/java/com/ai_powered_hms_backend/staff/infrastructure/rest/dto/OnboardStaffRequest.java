@@ -9,9 +9,9 @@ import jakarta.validation.constraints.NotNull;
 
 //this is a request dto and should be mapped to OnboardStaffCommand
 public record OnboardStaffRequest(
-		@NotBlank String employeeNumbe,
+		@NotBlank String employeeNumber,
 		@NotBlank String firstName,
-		@NotBlank String lastname,
+		@NotBlank String lastName,
 		@NotBlank String role,
 		String specialisation,
 		String department,

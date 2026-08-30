@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.ai_powered_hms_backend.identity.domain.valueobjects.RoleAssignmentStatus;
 import com.ai_powered_hms_backend.shared_kernel.base.AggregateRoot;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleAssignmentId;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleId;
@@ -54,12 +55,26 @@ public class RoleAssignment extends AggregateRoot<RoleAssignmentId>{
 	}
 	
 	public void revoke(UUID modifiedBy) {
+		  if (this.revoked) {
+	            return;
+	        }
 		this.revoked = true;
 		audit.update(modifiedBy);
 	}
 	
 	public boolean isActive() {
 		return !revoked && (expiresAt == null || expiresAt.isAfter(LocalDateTime.now()));
+	}
+	
+	public RoleAssignmentStatus status() {
+		if(revoked) {
+			return RoleAssignmentStatus.REVOKED;
+		}
+		if(expiresAt != null && !expiresAt.isAfter(LocalDateTime.now())) {
+			return RoleAssignmentStatus.EXPIRED;
+		}
+		
+		return RoleAssignmentStatus.ACTIVE;
 	}
 	
 	public RoleAssignmentId assignmentId() { return getId(); }

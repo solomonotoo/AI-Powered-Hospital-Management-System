@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Parent                                                              -->
+    <!-- Parent                                                              -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,26 +17,31 @@
     </parent>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Project Coordinates                                                 -->
+    <!-- Project Coordinates                                                 -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <groupId>com.hms</groupId>
     <artifactId>hms-application</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>AI-Native Hospital Management System</name>
+
     <description>
         Spring Modulith + DDD + Hexagonal Architecture HMS with embedded AI capabilities.
         Covers OPD, IPD, Clinical, Billing, Pharmacy, Laboratory, and Patient Engagement.
     </description>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Properties                                                          -->
+    <!-- Properties                                                          -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+
+        <!-- Java 17 - compatible with your Windows 8.1 machine -->
+        <java.version>17</java.version>
+        <maven.compiler.release>17</maven.compiler.release>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
@@ -45,18 +53,16 @@
         <testcontainers.version>1.20.3</testcontainers.version>
         <minio.version>8.5.12</minio.version>
         <opentelemetry.version>1.42.1</opentelemetry.version>
-        
-        <!--for flyway db variables-->
-        <db.url>jdbc:postgresql://localhost:5432/ai_hms_db</db.url>
-	    <db.user>hms_user</db.user>
-	    <db.password>shopme123</db.password>
+
     </properties>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Dependency Management (BOM imports)                                 -->
+    <!-- Dependency Management                                               -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <dependencyManagement>
         <dependencies>
+
             <!-- Spring Modulith BOM -->
             <dependency>
                 <groupId>org.springframework.modulith</groupId>
@@ -74,15 +80,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Dependencies                                                         -->
+    <!-- Dependencies                                                        -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <dependencies>
 
-        <!-- ── Core Spring Boot ───────────────────────────────────────── -->
+        <!-- ── Core Spring Boot ─────────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -98,38 +107,38 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- ── Spring Modulith ────────────────────────────────────────── -->
+
+        <!-- ── Spring Modulith ─────────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
 
-        <!-- Modulith events with JPA persistence (transactional outbox) -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-events-jpa</artifactId>
         </dependency>
 
-        <!-- Modulith observability -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-observability</artifactId>
         </dependency>
 
-        <!-- Modulith actuator endpoints -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-actuator</artifactId>
             <optional>true</optional>
         </dependency>
-        
-        <!-- REQUIRED: Event serializer -->
-        <dependency>
-		    <groupId>org.springframework.modulith</groupId>
-		    <artifactId>spring-modulith-events-jackson</artifactId>
-		</dependency>
 
-        <!-- ── Persistence ────────────────────────────────────────────── -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-events-jackson</artifactId>
+        </dependency>
+
+
+        <!-- ── Persistence ─────────────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -141,62 +150,56 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Flyway core + PostgreSQL support -->
+        <!-- Flyway -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>${flyway.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
             <version>${flyway.version}</version>
         </dependency>
 
-        <!-- ── Caching ────────────────────────────────────────────────── -->
-        <!-- <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
+
+        <!-- ── Caching ─────────────────────────────────────────────────── -->
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency> -->
-        
-        <dependency>
-		    <groupId>com.github.ben-manes.caffeine</groupId>
-		    <artifactId>caffeine</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
 
-        <!-- ── Security / Auth ────────────────────────────────────────── -->
+
+        <!-- ── Security / Authentication ───────────────────────────────── -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- OAuth2 Resource Server (JWT validation) -->
-        <!-- <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency> -->
 
-        <!-- JWT support -->
+        <!-- ── JWT ─────────────────────────────────────────────────────── -->
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.12.6</version>
         </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
@@ -204,58 +207,35 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ── API Documentation ──────────────────────────────────────── -->
+
+        <!-- ── API Documentation ───────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
 
-        <!-- ── Object Storage (MinIO / S3) ───────────────────────────── -->
-        <!-- <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>${minio.version}</version>
-        </dependency> -->
 
-        <!-- ── HTTP Client (for AI sidecar, external APIs) ───────────── -->
-        <!-- <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency> -->
+        <!-- ── Email ───────────────────────────────────────────────────── -->
 
-        <!-- ── Email ──────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- ── Observability ──────────────────────────────────────────── -->
-        <!-- Micrometer Prometheus registry -->
-        <!-- <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency> -->
 
-        <!-- OpenTelemetry tracing -->
-        <!-- <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-otel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${opentelemetry.version}</version>
-        </dependency> -->
+        <!-- ── MapStruct ───────────────────────────────────────────────── -->
 
-        <!-- ── Mapping ────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- ── Utilities ──────────────────────────────────────────────── -->
+
+        <!-- ── Lombok ──────────────────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -263,12 +243,17 @@
             <optional>true</optional>
         </dependency>
 
+
+        <!-- ── Utilities ───────────────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!-- ── Development Tools ──────────────────────────────────────── -->
+
+        <!-- ── Development Tools ───────────────────────────────────────── -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -282,59 +267,53 @@
             <optional>true</optional>
         </dependency>
 
+
         <!-- ══════════════════════════════════════════════════════════════ -->
-        <!--  TEST Dependencies                                              -->
+        <!-- TEST DEPENDENCIES                                               -->
         <!-- ══════════════════════════════════════════════════════════════ -->
 
-        <!-- Spring Boot Test (includes JUnit 5, Mockito, AssertJ) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-       
-		  <dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-testcontainers</artifactId>
-		    <scope>test</scope>
-		</dependency>
 
-        <!-- Spring Security Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring Modulith Test (module boundary verification) -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Testcontainers core -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Testcontainers PostgreSQL -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Testcontainers JUnit 5 integration -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- ArchUnit — enforce hexagonal architecture in tests -->
         <dependency>
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
@@ -342,7 +321,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Wiremock for external API stubbing in tests -->
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
@@ -352,9 +330,11 @@
 
     </dependencies>
 
+
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Build                                                               -->
+    <!-- Build                                                               -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <build>
         <plugins>
 
@@ -362,6 +342,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+
                 <configuration>
                     <excludes>
                         <exclude>
@@ -369,79 +350,110 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <!-- Layered JAR for optimised Docker image -->
+
                     <layers>
                         <enabled>true</enabled>
                     </layers>
                 </configuration>
             </plugin>
 
-            <!-- Maven Compiler Plugin — Java 21 + Lombok + MapStruct -->
+
+            <!-- Maven Compiler Plugin -->
+            <!-- Java 17 + Lombok + MapStruct -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+
+                    <!-- Java 17 -->
+                    <release>17</release>
+
                     <annotationProcessorPaths>
-                        <!-- Lombok must come before MapStruct -->
+
+                        <!-- Lombok -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
                         </path>
+
+                        <!-- MapStruct -->
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${mapstruct.version}</version>
                         </path>
+
+                        <!-- Spring Boot Configuration Processor -->
                         <path>
                             <groupId>org.springframework.boot</groupId>
                             <artifactId>spring-boot-configuration-processor</artifactId>
                         </path>
+
                     </annotationProcessorPaths>
+
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
+
                 </configuration>
             </plugin>
 
-            <!-- Flyway Maven Plugin (for manual migration runs) -->
+
+            <!-- Flyway Maven Plugin -->
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>${flyway.version}</version>
+
                 <configuration>
+
+                    <!-- Use Maven/system environment variables.
+                         This is separate from Spring's .env import. -->
+                    <!--
                     <url>${env.DB_URL}</url>
                     <user>${env.DB_USERNAME}</user>
                     <password>${env.DB_PASSWORD}</password>
+					-->
+					 <url>${env.DB_URL}</url>
+                    <user>${env.DB_USERNAME}</user>
+                    <password>${env.DB_PASSWORD}</password>
+
                     <locations>
-                        <location>filesystem:src/main/resources/db/migration</location>
+                        <location>
+                            filesystem:src/main/resources/db/migration
+                        </location>
                     </locations>
+
                 </configuration>
             </plugin>
 
-            <!-- Surefire — separate unit and integration test phases -->
+
+            <!-- Surefire -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+
                 <configuration>
-                    <!-- Unit tests: exclude integration and controller tests -->
                     <excludes>
                         <exclude>**/*IntegrationTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
 
-            <!-- Failsafe — integration tests -->
+
+            <!-- Failsafe -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+
                 <configuration>
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
                 </configuration>
+
                 <executions>
                     <execution>
                         <goals>
@@ -450,45 +462,58 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
 
         </plugins>
     </build>
 
+
     <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!--  Profiles                                                            -->
+    <!-- Maven Profiles                                                       -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
+
     <profiles>
 
         <profile>
             <id>dev</id>
+
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+
             <properties>
                 <spring.profiles.active>dev</spring.profiles.active>
             </properties>
         </profile>
 
+
         <profile>
             <id>prod</id>
+
             <properties>
                 <spring.profiles.active>prod</spring.profiles.active>
             </properties>
         </profile>
 
+
         <profile>
             <id>test</id>
+
             <properties>
                 <spring.profiles.active>test</spring.profiles.active>
             </properties>
         </profile>
-		<profile>
-	        <id>skip-tests</id>
-	        <properties>
-	            <skipTests>true</skipTests>
-	        </properties>
-    	</profile>
-   		 </profiles>
+
+
+        <profile>
+            <id>skip-tests</id>
+
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </profile>
+
+    </profiles>
 
 </project>

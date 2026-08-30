@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ai_powered_hms_backend.identity.application.port.in.CreateUserCredentialCommand;
 import com.ai_powered_hms_backend.identity.port.in.CreateUserCredentialUseCase;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
+import com.ai_powered_hms_backend.shared_kernel.infrastructure.rest.ApiResponse;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.Email;
 
 import jakarta.validation.Valid;
@@ -25,15 +26,31 @@ public class CredentialController {
 	}
 	
 	
+//	@PostMapping
+//	@PreAuthorize("hasAuthority('USER_MANAGE')") //Guard create credentials
+//	public ResponseEntity<Void> create(
+//			@Valid @RequestBody CreateCredentialRequest request
+//			){
+//		createUserCredentialUseCase.create(new CreateUserCredentialCommand(
+//				StaffId.of(request.staffId()), new Email(request.loginEmail()), request.temporaryPassword())
+//				);
+//		return ResponseEntity.ok().build();
+//	}
+	
 	@PostMapping
 	@PreAuthorize("hasAuthority('USER_MANAGE')") //Guard create credentials
-	public ResponseEntity<Void> create(
+	public ResponseEntity<ApiResponse<CreateCredentialResponse>> create(
 			@Valid @RequestBody CreateCredentialRequest request
 			){
-		createUserCredentialUseCase.create(new CreateUserCredentialCommand(
+	   createUserCredentialUseCase.create(new CreateUserCredentialCommand(
 				StaffId.of(request.staffId()), new Email(request.loginEmail()), request.temporaryPassword())
 				);
-		return ResponseEntity.ok().build();
+	   return ResponseEntity.ok(
+		        ApiResponse.success(
+		            "Credential created successfully",
+		            null
+		        )
+		    );
 	}
 	
 	

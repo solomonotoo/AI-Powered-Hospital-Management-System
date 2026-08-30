@@ -9,12 +9,17 @@ import com.ai_powered_hms_backend.shared_kernel.valueobjects.MRN;
 import lombok.RequiredArgsConstructor;
 
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class SequenceBaseMrnGenerator implements MedicalRecordNumberGenerator{
 
 	 private final JdbcTemplate jdbcTemplate;
 
-	    @Override
+	    public SequenceBaseMrnGenerator(JdbcTemplate jdbcTemplate) {
+		super();
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+		@Override
 	    public MRN generateFor(String facilityCode) {
 	        // Atomic per-facility increment, race-safe
 	        Long next = jdbcTemplate.queryForObject(

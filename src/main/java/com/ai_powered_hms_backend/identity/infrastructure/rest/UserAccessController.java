@@ -87,7 +87,7 @@ public class UserAccessController {
 	    }
 	 
 	 @GetMapping("/permissions")
-	 @PreAuthorize("hasAuthority('ROLE__MANAGE')")
+	 @PreAuthorize("hasAuthority('ROLE_MANAGE')")
 	 public ResponseEntity<List<PermissionResponse>> listPermission(){
 		 List<PermissionResponse> permissions = permissionQueryService.listAll().stream()
 				 .map(p -> new PermissionResponse(p.code(), p.description()))

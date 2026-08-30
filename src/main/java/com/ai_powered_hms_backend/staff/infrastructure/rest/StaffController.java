@@ -55,14 +55,17 @@ public class StaffController {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('STAFF_MANAGE')")
-	public ResponseEntity<OnboardStaffResponse> onboard(
+	public ResponseEntity<ApiResponse<OnboardStaffResponse>> onboard(
 			@Valid @RequestBody OnboardStaffRequest request,
 			@CurrentUserId UUID currentUserId
 			){
 		OnboardStaffCommand command = OnboardStaffRequestMapper.toCommand(request, currentUserId);
 		StaffId staffId = onboardStaffUseCase.onboard(command);
 		return ResponseEntity.status(HttpStatus.CREATED).
-				body(new OnboardStaffResponse(staffId.value().toString()));
+				body(
+						ApiResponse.success("Staff created successfully",
+								new OnboardStaffResponse(staffId.value().toString()))
+						);
 	}
 	
 	

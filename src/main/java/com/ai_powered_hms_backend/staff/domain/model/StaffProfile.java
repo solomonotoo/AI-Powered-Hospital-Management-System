@@ -28,6 +28,13 @@ public class StaffProfile extends AggregateRoot<StaffId>{
 
 	private  EmployeeNumber employeeNumber;
 	private PersonName fullName;
+	/**
+	 * Occupational/job-title classification (HR fact) — has NO bearing on system
+	 * access. Authorization is governed entirely by Role/RoleAssignment/Permission
+	 * (see identity module). This field only drives: (1) the license-required
+	 * business rule for clinical roles, (2) staff directory/reporting, and
+	 * (3) default role-assignment suggestions in the admin UI.
+	 */
 	private StaffRole role;
 	private String specialisation; //doctors only, nullable
 	private String department;

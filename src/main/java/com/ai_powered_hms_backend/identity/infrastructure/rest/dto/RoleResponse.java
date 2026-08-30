@@ -4,7 +4,7 @@ import java.util.Set;
 
 public record RoleResponse(
 		String roleId, String name, String description,
-		Set<String> permissionCode, boolean systemDefault
+		Set<String> permissionCodes, boolean systemDefined
 		) {
 
 }
