@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.ai_powered_hms_backend.identity.application.port.out.RoleAssignmentRepository;
@@ -37,6 +39,17 @@ public class RoleAssignmentRepositoryAdapter implements RoleAssignmentRepository
 		return jpaRepository.findByStaffId(staffId.value()).stream()
 				.map(RoleAssignmentPersistenceMapper::toDomain)
 				.collect(Collectors.toList());
+	}
+
+
+	@Override
+	public RoleAssignmentPage findAll(int page, int size) {
+		Page<RoleAssignmentJpaEntity> result = jpaRepository.findAll(PageRequest.of(page, size));
+		List<RoleAssignment> content = result.getContent().stream()
+				.map(RoleAssignmentPersistenceMapper :: toDomain)
+				.collect(Collectors.toList());
+		
+		return new RoleAssignmentPage(content,result.getTotalElements(),page,size);
 	}
 
 }

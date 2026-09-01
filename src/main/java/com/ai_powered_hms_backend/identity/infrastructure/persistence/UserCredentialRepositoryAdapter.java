@@ -1,7 +1,12 @@
 package com.ai_powered_hms_backend.identity.infrastructure.persistence;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.ai_powered_hms_backend.identity.application.port.out.UserCredentialRepository;
@@ -43,6 +48,18 @@ public class UserCredentialRepositoryAdapter implements UserCredentialRepository
 	public boolean existsByLoginEmail(String email) {
 		// TODO Auto-generated method stub
 		return jpaRepository.existsByLoginEmailValue(new Email(email));
+	}
+
+	@Override
+	public UserCredentialPage findAll(int page, int size) {
+		Page<UserCredentialJpaEntity> result = jpaRepository.findAll(
+				PageRequest.of(page, size, Sort.by("loginEmail"))
+				);
+		
+		List<UserCredential> content = result.getContent().stream()
+				.map(UserCredentialPersistenceMapper :: toDomain)
+				.collect(Collectors.toList());
+		return new UserCredentialPage(content,result.getTotalElements(), page,size);
 	}
 
 }

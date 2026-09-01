@@ -1,22 +1,29 @@
 package com.ai_powered_hms_backend.identity.infrastructure.rest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_powered_hms_backend.identity.application.port.in.ListUsersUseCase;
 import com.ai_powered_hms_backend.identity.application.port.out.PermissionRepository;
 import com.ai_powered_hms_backend.identity.application.port.out.RoleRepository;
+import com.ai_powered_hms_backend.identity.application.query.ListUsersQuery;
+import com.ai_powered_hms_backend.identity.application.service.ListAllRoleAssignmentsService;
 import com.ai_powered_hms_backend.identity.application.service.PermissionQueryService;
 import com.ai_powered_hms_backend.identity.application.service.RoleQueryService;
 import com.ai_powered_hms_backend.identity.application.service.SessionQueryService;
@@ -27,18 +34,22 @@ import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.AssignRoleReq
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.PermissionResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponseMapper;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentSummaryResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.SessionResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UpdateAssignmentRequest;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserAccessResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserActivityResponse;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserSummaryResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.SessionResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserActivityResponseMapper;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserSumaryResponseMapper;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleAssignmentId;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleId;
 import com.ai_powered_hms_backend.shared_kernel.ids.SessionId;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
+import com.ai_powered_hms_backend.shared_kernel.infrastructure.rest.PagedResponse;
 import com.ai_powered_hms_backend.shared_kernel.infrastructure.security.CurrentUserId;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -55,17 +66,64 @@ public class UserAccessController {
 	 private final UserAccessService userAccessService;
 	 private final SessionQueryService sessionQueryService;
 	 private final UserActivityQueryService activityQueryService;
+	 private final ListUsersUseCase listUsersUseCase;
+	 private final ListAllRoleAssignmentsService listAllRoleAssignmentsService;
 	 
 	 public UserAccessController(RoleQueryService roleQueryService, PermissionQueryService permissionQueryService,
 			UserAccessService userAccessService, SessionQueryService sessionQueryService,
-			UserActivityQueryService activityQueryService) {
+			UserActivityQueryService activityQueryService,
+			ListUsersUseCase listUsersUseCase,
+			ListAllRoleAssignmentsService listAllRoleAssignmentsService) {
 		super();
 		this.roleQueryService = roleQueryService;
 		this.permissionQueryService = permissionQueryService;
 		this.userAccessService = userAccessService;
 		this.sessionQueryService = sessionQueryService;
 		this.activityQueryService = activityQueryService;
+		this.listUsersUseCase = listUsersUseCase;
+		this.listAllRoleAssignmentsService = listAllRoleAssignmentsService;
 	}
+	 
+	 // ---------------------------------------------------------------
+	    // User credentials list
+	    // ---------------------------------------------------------------	
+		
+		@GetMapping("/users")
+		 @PreAuthorize("hasAuthority('USER_MANAGE')")
+		public ResponseEntity<PagedResponse<UserSummaryResponse>> listUsers(
+				@RequestParam(defaultValue = "0") int page,
+				@RequestParam(defaultValue = "20") int size
+				){
+			var result = listUsersUseCase.list(
+					new ListUsersQuery(page, size)
+					);
+			List<UserSummaryResponse> users = result.content().stream()
+					.map(UserSumaryResponseMapper:: toResponse)
+					.collect(Collectors.toList());
+			
+			return ResponseEntity.ok(PagedResponse.of(users, page, size, size));
+			
+		}
+		
+		
+		@GetMapping("/users/roles")
+		@PreAuthorize("hasAuthority('ROLE_MANAGE')")
+		public ResponseEntity<PagedResponse<RoleAssignmentSummaryResponse>> listAllRoleAssignments(
+				@RequestParam(defaultValue = "0") int page,
+				@RequestParam(defaultValue = "20") int size
+				){
+			
+			var result = listAllRoleAssignmentsService.list(page, size);
+			List<RoleAssignmentSummaryResponse> assignment = result.content().stream()
+					.map( r -> new RoleAssignmentSummaryResponse(
+							r.assignmentId(), r.staffId(), r.staffFullName(),
+							r.roleId(), r.roleName(), r.expiresAt(), r.revoked()
+							))
+					.collect(Collectors.toList());
+			
+			return ResponseEntity.ok(PagedResponse.of(assignment, page, size, size));
+		}
+		
 
 	// ---------------------------------------------------------------
 	    // Role & permission catalog (admin-managed reference data)
@@ -218,4 +276,21 @@ public class UserAccessController {
 		    sessionQueryService.revokeIfOwnedBy(SessionId.of(sessionId), StaffId.of(userId));
 		    return ResponseEntity.noContent().build();
 	}
+		
+		
+//		@GetMapping("/debug-auth")
+//		public Object debugAuth(Authentication authentication) {
+//		    return Map.of(
+//		        "principalClass",
+//		        authentication.getPrincipal().getClass().getName(),
+//		        "principal",
+//		        authentication.getPrincipal().toString(),
+//		        "authorities",
+//		        authentication.getAuthorities().toString()
+//		    );
+//		}
+
+		
+		
+		
 }

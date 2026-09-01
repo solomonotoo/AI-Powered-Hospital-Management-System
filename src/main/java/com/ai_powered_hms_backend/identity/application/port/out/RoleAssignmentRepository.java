@@ -11,4 +11,9 @@ public interface RoleAssignmentRepository {
 	void save(RoleAssignment assignment);
 	Optional<RoleAssignment> findById(RoleAssignmentId id);
 	List<RoleAssignment> findByStaffId(StaffId staffId);
+	
+	//fpr list of user roles
+	RoleAssignmentPage findAll(int page, int size);
+	
+	record RoleAssignmentPage(List<RoleAssignment> content, long totalElement, int page, int size) {};
 }
