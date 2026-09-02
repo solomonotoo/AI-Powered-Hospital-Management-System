@@ -3,7 +3,7 @@ package com.ai_powered_hms_backend.identity.infrastructure.rest.mapper;
 import com.ai_powered_hms_backend.identity.application.query.UserSummaryResult;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserSummaryResponse;
 
-public class UserSumaryResponseMapper {
+public class UserSummaryResponseMapper {
 	public static UserSummaryResponse toResponse(UserSummaryResult r) {
 		return new UserSummaryResponse(
 				r.staffId(),

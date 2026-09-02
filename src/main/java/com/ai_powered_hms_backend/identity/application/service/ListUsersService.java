@@ -40,7 +40,7 @@ public class ListUsersService implements ListUsersUseCase{
 		List<UserSummaryResult> content = page.content().stream()
 				.map(this::toSummary)
 				.collect(Collectors.toList());
-		return null;
+		return new UsersPage(content,page.totalElements(),page.page(),page.size());
 	}
 	
 	private UserSummaryResult toSummary(UserCredential credential) {

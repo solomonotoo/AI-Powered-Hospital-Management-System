@@ -1,15 +1,12 @@
 package com.ai_powered_hms_backend.identity.infrastructure.rest;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ai_powered_hms_backend.identity.application.port.in.ListUsersUseCase;
-import com.ai_powered_hms_backend.identity.application.port.out.PermissionRepository;
-import com.ai_powered_hms_backend.identity.application.port.out.RoleRepository;
 import com.ai_powered_hms_backend.identity.application.query.ListUsersQuery;
 import com.ai_powered_hms_backend.identity.application.service.ListAllRoleAssignmentsService;
 import com.ai_powered_hms_backend.identity.application.service.PermissionQueryService;
@@ -44,7 +39,7 @@ import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserActivityR
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserSummaryResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.SessionResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserActivityResponseMapper;
-import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserSumaryResponseMapper;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserSummaryResponseMapper;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleAssignmentId;
 import com.ai_powered_hms_backend.shared_kernel.ids.RoleId;
 import com.ai_powered_hms_backend.shared_kernel.ids.SessionId;
@@ -98,10 +93,10 @@ public class UserAccessController {
 					new ListUsersQuery(page, size)
 					);
 			List<UserSummaryResponse> users = result.content().stream()
-					.map(UserSumaryResponseMapper:: toResponse)
+					.map(UserSummaryResponseMapper:: toResponse)
 					.collect(Collectors.toList());
 			
-			return ResponseEntity.ok(PagedResponse.of(users, page, size, size));
+			return ResponseEntity.ok(PagedResponse.of(users, result.page(), result.size(), result.totalElements()));
 			
 		}
 		
@@ -121,7 +116,7 @@ public class UserAccessController {
 							))
 					.collect(Collectors.toList());
 			
-			return ResponseEntity.ok(PagedResponse.of(assignment, page, size, size));
+			return ResponseEntity.ok(PagedResponse.of(assignment, result.page(), result.size(), result.totalElements()));
 		}
 		
 
