@@ -29,10 +29,25 @@ public class ListUsersService implements ListUsersUseCase{
 
 
 
+//	@Override
+//	@Transactional(readOnly = true)
+//	public UsersPage list(ListUsersQuery query) {
+//		UserCredentialPage page = credentialRepository.findAll(query.page(), query.size());
+//		
+//		// NOTE: one StaffLookup call per credential — acceptable at admin-roster
+//        // scale (dozens/hundreds of users), but if this list ever needs to serve
+//        // thousands of rows per page, batch this into a single bulk lookup instead.
+//		List<UserSummaryResult> content = page.content().stream()
+//				.map(this::toSummary)
+//				.collect(Collectors.toList());
+//		return new UsersPage(content,page.totalElements(),page.page(),page.size());
+//	}
+	
+	
 	@Override
 	@Transactional(readOnly = true)
 	public UsersPage list(ListUsersQuery query) {
-		UserCredentialPage page = credentialRepository.findAll(query.page(), query.size());
+		UserCredentialPage page = credentialRepository.search(query);
 		
 		// NOTE: one StaffLookup call per credential — acceptable at admin-roster
         // scale (dozens/hundreds of users), but if this list ever needs to serve
@@ -58,7 +73,8 @@ public class ListUsersService implements ListUsersUseCase{
 				staff.fullName(),
 				credential.loginEmail().getValue(),
 				staff.role(),
-				credential.isActive(),
+				//credential.isActive(),
+				credential.status(),
 				credential.mustChangePassword(),
 				credential.lastLoginAt()
 				);

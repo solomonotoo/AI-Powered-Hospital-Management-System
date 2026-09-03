@@ -10,7 +10,8 @@ public class UserSummaryResponseMapper {
 				r.fullName(),
 				r.loginEmail(),
 				r.staffRole(),
-				r.active(),
+				//r.active(),
+				r.status().name(),
 				r.mustChangePassword(), 
 				r.lastLoginAt() == null ? null : r.lastLoginAt().toString());
 	}

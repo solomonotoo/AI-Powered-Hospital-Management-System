@@ -3,6 +3,7 @@ package com.ai_powered_hms_backend.identity.application.port.out;
 import java.util.List;
 import java.util.Optional;
 
+import com.ai_powered_hms_backend.identity.application.query.ListUsersQuery;
 import com.ai_powered_hms_backend.identity.domain.model.UserCredential;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
 
@@ -13,8 +14,16 @@ public interface UserCredentialRepository {
 	Optional<UserCredential> findByLoginEmail(String email);
 	boolean existsByLoginEmail(String email);
 	
+	UserCredentialSummary getSummary();
+	
+	record UserCredentialSummary(long total,long active,long mfaEnabled,long suspended) {};
+	
 	//list of all user credentials(account roster)
-	UserCredentialPage findAll(int page, int size);
+	//UserCredentialPage findAll(int page, int size);
+	
+	//NB /UserCredentialPage findAll(int page, int size); is replace with the below
+	UserCredentialPage search(ListUsersQuery query);
+	
 	
 	//nested record
 	record UserCredentialPage(List<UserCredential> content, long totalElements, int page, int size) {};

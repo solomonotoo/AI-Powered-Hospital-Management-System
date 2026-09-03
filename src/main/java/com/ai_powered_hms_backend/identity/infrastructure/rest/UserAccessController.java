@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_powered_hms_backend.identity.application.port.in.GetUserSummaryUseCase;
 import com.ai_powered_hms_backend.identity.application.port.in.ListUsersUseCase;
+import com.ai_powered_hms_backend.identity.application.port.in.SuspendedUserUseCase;
 import com.ai_powered_hms_backend.identity.application.query.ListUsersQuery;
 import com.ai_powered_hms_backend.identity.application.service.ListAllRoleAssignmentsService;
 import com.ai_powered_hms_backend.identity.application.service.PermissionQueryService;
@@ -28,7 +30,6 @@ import com.ai_powered_hms_backend.identity.domain.model.RoleAssignment;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.AssignRoleRequest;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.PermissionResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponse;
-import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentSummaryResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleResponseMapper;
@@ -36,7 +37,9 @@ import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.SessionRespon
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UpdateAssignmentRequest;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserAccessResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserActivityResponse;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserSummaryCardResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.UserSummaryResponse;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.RoleAssignmentResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.SessionResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserActivityResponseMapper;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.mapper.UserSummaryResponseMapper;
@@ -56,6 +59,7 @@ public class UserAccessController {
 	 private static final String SELF_OR_ADMIN =
 		        "#userId.toString() == authentication.principal.staffId().value().toString() or hasAuthority('USER_MANAGE')";
 
+	 private final GetUserSummaryUseCase getUserSummaryUseCase;
 	 private final RoleQueryService roleQueryService;
 	 private final PermissionQueryService permissionQueryService;
 	 private final UserAccessService userAccessService;
@@ -63,13 +67,18 @@ public class UserAccessController {
 	 private final UserActivityQueryService activityQueryService;
 	 private final ListUsersUseCase listUsersUseCase;
 	 private final ListAllRoleAssignmentsService listAllRoleAssignmentsService;
+	 private final SuspendedUserUseCase suspendedUserUseCase;
 	 
-	 public UserAccessController(RoleQueryService roleQueryService, PermissionQueryService permissionQueryService,
+	 public UserAccessController(
+			 GetUserSummaryUseCase getUserSummaryUseCase,
+			 RoleQueryService roleQueryService, PermissionQueryService permissionQueryService,
 			UserAccessService userAccessService, SessionQueryService sessionQueryService,
 			UserActivityQueryService activityQueryService,
 			ListUsersUseCase listUsersUseCase,
-			ListAllRoleAssignmentsService listAllRoleAssignmentsService) {
+			ListAllRoleAssignmentsService listAllRoleAssignmentsService,
+			SuspendedUserUseCase suspendedUserUseCase) {
 		super();
+		this.getUserSummaryUseCase = getUserSummaryUseCase;
 		this.roleQueryService = roleQueryService;
 		this.permissionQueryService = permissionQueryService;
 		this.userAccessService = userAccessService;
@@ -77,21 +86,52 @@ public class UserAccessController {
 		this.activityQueryService = activityQueryService;
 		this.listUsersUseCase = listUsersUseCase;
 		this.listAllRoleAssignmentsService = listAllRoleAssignmentsService;
+		this.suspendedUserUseCase = suspendedUserUseCase;
 	}
+	 
+	 @GetMapping("/users/summary")
+	 @PreAuthorize("hasAuthority('USER_MANAGE')")
+	 public ResponseEntity<UserSummaryCardResponse> getUserSummary(){
+		 var summary = getUserSummaryUseCase.getSummary();
+		 return ResponseEntity.ok(new UserSummaryCardResponse(summary.total(),summary.active(),summary.mfaEnabled(),summary.suspended()));
+	 }
 	 
 	 // ---------------------------------------------------------------
 	    // User credentials list
 	    // ---------------------------------------------------------------	
 		
-		@GetMapping("/users")
-		 @PreAuthorize("hasAuthority('USER_MANAGE')")
+//		@GetMapping("/users")
+//		@PreAuthorize("hasAuthority('USER_MANAGE')")
+//		public ResponseEntity<PagedResponse<UserSummaryResponse>> listUsers(
+//				@RequestParam(defaultValue = "0") int page,
+//				@RequestParam(defaultValue = "20") int size
+//				){
+//			var result = listUsersUseCase.list(
+//					new ListUsersQuery(page, size)
+//					);
+//			List<UserSummaryResponse> users = result.content().stream()
+//					.map(UserSummaryResponseMapper:: toResponse)
+//					.collect(Collectors.toList());
+//			
+//			return ResponseEntity.ok(PagedResponse.of(users, result.page(), result.size(), result.totalElements()));
+//			
+//		}
+	 
+	 	@GetMapping("/users")
+		@PreAuthorize("hasAuthority('USER_MANAGE')")
 		public ResponseEntity<PagedResponse<UserSummaryResponse>> listUsers(
+				@RequestParam(required = false) String search,
+				@RequestParam(required = false) Boolean active,
+				@RequestParam(required = false) Boolean mfaEnabled,
+				@RequestParam(defaultValue = "loginEmail") String sortBy,
+				@RequestParam(defaultValue = "asc") String sortDir,
 				@RequestParam(defaultValue = "0") int page,
 				@RequestParam(defaultValue = "20") int size
 				){
 			var result = listUsersUseCase.list(
-					new ListUsersQuery(page, size)
+					new ListUsersQuery(search,active,mfaEnabled,sortBy,sortDir,page,size)
 					);
+			
 			List<UserSummaryResponse> users = result.content().stream()
 					.map(UserSummaryResponseMapper:: toResponse)
 					.collect(Collectors.toList());
@@ -272,20 +312,30 @@ public class UserAccessController {
 		    return ResponseEntity.noContent().build();
 	}
 		
-		
-//		@GetMapping("/debug-auth")
-//		public Object debugAuth(Authentication authentication) {
-//		    return Map.of(
-//		        "principalClass",
-//		        authentication.getPrincipal().getClass().getName(),
-//		        "principal",
-//		        authentication.getPrincipal().toString(),
-//		        "authorities",
-//		        authentication.getAuthorities().toString()
-//		    );
-//		}
+//		Deliberately not SELF_OR_ADMIN — a user should never be able to suspend 
+//		or reactivate their own account; this must be USER_MANAGE-only 
+//		(an admin action against someone else). Worth double-checking this is
+//		what you want, but I'd be surprised if self-suspension were intentional.
 
+		@PostMapping("/users/{userId}/suspend")
+		@PreAuthorize("hasAuthority('USER_MANAGE')")
+		public ResponseEntity<Void> suspendUser(
+				@PathVariable UUID userId,
+				@CurrentUserId UUID currentUserId
+				){
+			suspendedUserUseCase.suspend(StaffId.of(userId), currentUserId);
+			return ResponseEntity.noContent().build();
+		}
 		
 		
+		@PostMapping("/users/{userId}/reactivate")
+		@PreAuthorize("hasAuthority('USER_MANAGE')")
+		public ResponseEntity<Void> reactivityUser(
+				@PathVariable UUID userId,
+				@CurrentUserId UUID currentUserId
+				){
+			suspendedUserUseCase.reactivate(StaffId.of(userId), currentUserId);
+			return ResponseEntity.noContent().build();
+		}
 		
 }

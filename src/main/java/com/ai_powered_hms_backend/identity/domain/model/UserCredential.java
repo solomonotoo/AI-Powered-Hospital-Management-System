@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import com.ai_powered_hms_backend.identity.domain.valueobjects.HashedPassword;
+import com.ai_powered_hms_backend.identity.domain.valueobjects.UserAccountStatus;
 import com.ai_powered_hms_backend.shared_kernel.base.AggregateRoot;
 import com.ai_powered_hms_backend.shared_kernel.ids.StaffId;
 import com.ai_powered_hms_backend.shared_kernel.valueobjects.AuditMetadata;
@@ -97,7 +98,10 @@ public class UserCredential extends AggregateRoot<StaffId> {
 		Objects.requireNonNull(modifiedBy, "Modified by must not be null");
 		audit.update(modifiedBy);
 	}
-
+	
+	public UserAccountStatus status() {
+		return  active ? UserAccountStatus.ACTIVE : UserAccountStatus.SUSPENDED;
+		}
 	// accessors or getters
 	public StaffId staffId() {
 		return getId();

@@ -1,6 +1,7 @@
-package com.ai_powered_hms_backend.identity.infrastructure.rest.dto;
+package com.ai_powered_hms_backend.identity.infrastructure.rest.mapper;
 
 import com.ai_powered_hms_backend.identity.domain.model.RoleAssignment;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponse;
 
 public class RoleAssignmentResponseMapper {
 
