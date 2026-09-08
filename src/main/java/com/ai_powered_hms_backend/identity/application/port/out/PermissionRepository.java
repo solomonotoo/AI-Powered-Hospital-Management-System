@@ -6,4 +6,6 @@ import com.ai_powered_hms_backend.identity.domain.model.Permission;
 
 public interface PermissionRepository {
 	List<Permission> findAll();
+	void save(Permission permission);
+	boolean existsByCode(String code);
 }

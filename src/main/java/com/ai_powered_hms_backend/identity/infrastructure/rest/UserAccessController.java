@@ -1,5 +1,6 @@
 package com.ai_powered_hms_backend.identity.infrastructure.rest;
 
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -16,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ai_powered_hms_backend.identity.application.command.CreatePermissionCommand;
+import com.ai_powered_hms_backend.identity.application.command.CreateRoleCommand;
+import com.ai_powered_hms_backend.identity.application.port.in.CreatePermissionUseCase;
+import com.ai_powered_hms_backend.identity.application.port.in.CreateRoleUserCase;
 import com.ai_powered_hms_backend.identity.application.port.in.GetUserSummaryUseCase;
 import com.ai_powered_hms_backend.identity.application.port.in.ListUsersUseCase;
 import com.ai_powered_hms_backend.identity.application.port.in.SuspendedUserUseCase;
@@ -28,6 +33,8 @@ import com.ai_powered_hms_backend.identity.application.service.UserAccessService
 import com.ai_powered_hms_backend.identity.application.service.UserActivityQueryService;
 import com.ai_powered_hms_backend.identity.domain.model.RoleAssignment;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.AssignRoleRequest;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.CreatePermissionRequest;
+import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.CreateRoleRequest;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.PermissionResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentResponse;
 import com.ai_powered_hms_backend.identity.infrastructure.rest.dto.RoleAssignmentSummaryResponse;
@@ -51,6 +58,7 @@ import com.ai_powered_hms_backend.shared_kernel.infrastructure.rest.PagedRespons
 import com.ai_powered_hms_backend.shared_kernel.infrastructure.security.CurrentUserId;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -68,15 +76,17 @@ public class UserAccessController {
 	 private final ListUsersUseCase listUsersUseCase;
 	 private final ListAllRoleAssignmentsService listAllRoleAssignmentsService;
 	 private final SuspendedUserUseCase suspendedUserUseCase;
+	 private final CreatePermissionUseCase createPermissionUseCase;
+	 private final CreateRoleUserCase createRoleUserCase;
 	 
-	 public UserAccessController(
-			 GetUserSummaryUseCase getUserSummaryUseCase,
-			 RoleQueryService roleQueryService, PermissionQueryService permissionQueryService,
-			UserAccessService userAccessService, SessionQueryService sessionQueryService,
-			UserActivityQueryService activityQueryService,
-			ListUsersUseCase listUsersUseCase,
-			ListAllRoleAssignmentsService listAllRoleAssignmentsService,
-			SuspendedUserUseCase suspendedUserUseCase) {
+	
+	 
+	 public UserAccessController(GetUserSummaryUseCase getUserSummaryUseCase, RoleQueryService roleQueryService,
+			PermissionQueryService permissionQueryService, UserAccessService userAccessService,
+			SessionQueryService sessionQueryService, UserActivityQueryService activityQueryService,
+			ListUsersUseCase listUsersUseCase, ListAllRoleAssignmentsService listAllRoleAssignmentsService,
+			SuspendedUserUseCase suspendedUserUseCase, CreatePermissionUseCase createPermissionUseCase,
+			CreateRoleUserCase createRoleUserCase) {
 		super();
 		this.getUserSummaryUseCase = getUserSummaryUseCase;
 		this.roleQueryService = roleQueryService;
@@ -87,8 +97,10 @@ public class UserAccessController {
 		this.listUsersUseCase = listUsersUseCase;
 		this.listAllRoleAssignmentsService = listAllRoleAssignmentsService;
 		this.suspendedUserUseCase = suspendedUserUseCase;
+		this.createPermissionUseCase = createPermissionUseCase;
+		this.createRoleUserCase = createRoleUserCase;
 	}
-	 
+
 	 @GetMapping("/users/summary")
 	 @PreAuthorize("hasAuthority('USER_MANAGE')")
 	 public ResponseEntity<UserSummaryCardResponse> getUserSummary(){
@@ -160,9 +172,21 @@ public class UserAccessController {
 		}
 		
 
+
 	// ---------------------------------------------------------------
 	    // Role & permission catalog (admin-managed reference data)
 	    // ---------------------------------------------------------------
+		
+	@PostMapping("/roles")
+	@PreAuthorize("hasAuthority('ROLE_MANAGE')")
+	public ResponseEntity<RoleResponse> createRole(
+			@Valid @RequestBody CreateRoleRequest request,
+			@CurrentUserId UUID currentUserId
+			){
+		RoleId roleId = createRoleUserCase.create(new CreateRoleCommand(request.name(), request.description(), request.permissionCodes(), currentUserId));
+		return ResponseEntity.status(HttpStatus.CREATED).body(RoleResponseMapper.toResponse(
+				roleQueryService.getById(roleId)));
+	}
 
 	 @GetMapping("/roles")
 	    @PreAuthorize("hasAuthority('ROLE_MANAGE')")
@@ -178,6 +202,13 @@ public class UserAccessController {
 	 public ResponseEntity<RoleResponse> getRole(@PathVariable UUID roleId) {
 	        return ResponseEntity.ok(RoleResponseMapper.toResponse(roleQueryService.getById(RoleId.of(roleId))));
 	    }
+	 
+	 @PostMapping("/permissions")
+	 @PreAuthorize("hasAuthority('ROLE_MANAGE')")
+	 public ResponseEntity<Void> createPermission(@Valid @RequestBody CreatePermissionRequest request) {
+	     createPermissionUseCase.create(new CreatePermissionCommand(request.code(), request.description()));
+	     return ResponseEntity.status(HttpStatus.CREATED).build();
+	 }
 	 
 	 @GetMapping("/permissions")
 	 @PreAuthorize("hasAuthority('ROLE_MANAGE')")

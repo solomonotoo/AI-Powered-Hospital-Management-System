@@ -24,4 +24,18 @@ public class PermissionRepositoryAdapter implements PermissionRepository{
 				.collect(Collectors.toList());
 	}
 
+
+	@Override
+	public void save(Permission permission) {
+		jpaRepository.save(new PermissionJpaEntity(permission.code(), permission.description()));
+		
+	}
+
+
+	@Override
+	public boolean existsByCode(String code) {
+		// TODO Auto-generated method stub
+		return jpaRepository.existsById(code);
+	}
+
 }

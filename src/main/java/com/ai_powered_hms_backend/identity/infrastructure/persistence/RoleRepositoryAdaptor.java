@@ -41,4 +41,10 @@ public class RoleRepositoryAdaptor implements RoleRepository{
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public boolean existsByName(String name) {
+		// TODO Auto-generated method stub
+		return jpaRepository.existsByName(name);
+	}
+
 }

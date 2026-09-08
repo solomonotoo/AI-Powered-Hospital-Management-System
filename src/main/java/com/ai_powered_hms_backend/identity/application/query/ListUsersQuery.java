@@ -30,7 +30,7 @@ public record ListUsersQuery(
 		int page, 
 		int size) {
 	
-	private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("loginemail", "lastLoginAt", "createdAt");
+	private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("loginEmail", "lastLoginAt", "createdAt");
 	
 
 	public ListUsersQuery{
@@ -41,7 +41,7 @@ public record ListUsersQuery(
 //		Validating sortBy against a hardcoded whitelist here is deliberate — it's what makes it safe to feed into a native 
 //		query's ORDER BY clause later without any SQL-injection risk, since only these three literal strings can ever reach that point.
 		
-		sortBy = (sortBy == null || sortBy.isBlank()) ? "loginemail" : sortBy;
+		sortBy = (sortBy == null || sortBy.isBlank()) ? "loginEmail" : sortBy;
 		if(!ALLOWED_SORT_FIELDS.contains(sortBy)) {
 			throw new IllegalArgumentException("sortBy must be one of " + ALLOWED_SORT_FIELDS);
 		}
